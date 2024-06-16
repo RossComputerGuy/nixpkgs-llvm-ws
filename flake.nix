@@ -9,7 +9,9 @@
   outputs = { self, nixpkgs, flake-utils, ... }@inputs:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = nixpkgs.legacyPackages.${system}.pkgsLLVM;
+        pkgs = nixpkgs.legacyPackages.${system}.pkgsLLVM.appendOverlays [
+          (import ./pkgs/default.nix nixpkgs.lib)
+        ];
         inherit (pkgs) lib;
       in {
         legacyPackages = pkgs;
