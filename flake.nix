@@ -9,21 +9,22 @@
   outputs = { self, nixpkgs, flake-utils, ... }@inputs:
     flake-utils.lib.eachDefaultSystem (system:
       let
+        inherit (nixpkgs) lib;
+
         pkgs = nixpkgs.legacyPackages.${system}.pkgsLLVM.appendOverlays [
-          (import ./pkgs/default.nix nixpkgs.lib)
+          (import ./pkgs/default.nix lib)
         ];
-        inherit (pkgs) lib;
       in {
         legacyPackages = pkgs;
-
-        nixosConfigurations = lib.nixosSystem {
-          inherit pkgs system;
-          modules = [ ./nixos/default.nix ];
-        };
 
         # Common packages we want to ensure work with LLVM
         packages = {
           inherit (pkgs) linux mesa bash stdenv;
+        };
+      } // lib.optionalAttrs pkgs.stdenv.isLinux {
+        nixosConfigurations = lib.nixosSystem {
+          inherit pkgs system;
+          modules = [ ./nixos/default.nix ];
         };
       });
 }
