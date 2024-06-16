@@ -1,6 +1,16 @@
 # nixpkgs-llvm-ws
 
-Flake workspace / repo to stage and track Nixpkgs/NixOS's ability to be compiled completely with LLVM
+Flake workspace / repo to stage and track Nixpkgs/NixOS's ability to be compiled completely with LLVM.
+Goal is to ensure the majority of Nixpkgs works under `pkgsLLVM` or with LLVM.
+
+## Roadmap
+
+Current roadmap as of 2024-06-15:
+
+- [ ] Working minimal NixOS config
+- [ ] Enable Hydra testing
+- [ ] Automated build failure reports
+- [ ] Working graphical NixOS config
 
 ## Contributing
 
