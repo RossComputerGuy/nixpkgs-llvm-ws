@@ -20,4 +20,9 @@ lib: final: prev:
       })
     ];
   });
+
+  # PR: https://github.com/NixOS/nixpkgs/pull/320187
+  db4 = prev.db4.overrideAttrs (f: p: {
+    configureFlags = p.configureFlags ++ [ "--with-mutex=POSIX/pthreads" ];
+  });
 }
