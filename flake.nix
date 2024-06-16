@@ -24,7 +24,10 @@
       } // lib.optionalAttrs pkgs.stdenv.isLinux {
         nixosConfigurations = lib.nixosSystem {
           inherit pkgs system;
-          modules = [ ./nixos/default.nix ];
+          modules = [
+            "${nixpkgs}/nixos/modules/virtualisation/qemu-vm.nix"
+            ./nixos/default.nix
+          ];
         };
       });
 }
