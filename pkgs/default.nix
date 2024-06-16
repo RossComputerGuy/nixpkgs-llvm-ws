@@ -25,4 +25,10 @@ lib: final: prev:
   db4 = prev.db4.overrideAttrs (f: p: {
     configureFlags = p.configureFlags ++ [ "--with-mutex=POSIX/pthreads" ];
   });
+
+  # PR: https://github.com/NixOS/nixpkgs/pull/320199
+  libgcrypt = prev.libgcrypt.overrideAttrs (f: p: {
+    configureFlags = p.configureFlags
+      ++ lib.optional (final.stdenv.cc.bintools.isLLVM && lib.versionAtLeast final.stdenv.cc.bintools.version "17") "LDFLAGS=-Wl,--undefined-version";
+  });
 }
