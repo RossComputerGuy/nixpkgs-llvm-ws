@@ -32,4 +32,12 @@ lib: final: prev:
     configureFlags = p.configureFlags
       ++ lib.optional (final.stdenv.cc.bintools.isLLVM && lib.versionAtLeast final.stdenv.cc.bintools.version "17") "LDFLAGS=-Wl,--undefined-version";
   });
+
+  # PR: https://github.com/NixOS/nixpkgs/pull/320432
+  rustc = prev.rustc.override {
+    rustc-unwrapped = prev.rustc.unwrapped.overrideAttrs (f: p: {
+      configureFlags = p.configureFlags
+        ++ [ "--llvm-libunwind=in-tree" ];
+    });
+  };
 }
