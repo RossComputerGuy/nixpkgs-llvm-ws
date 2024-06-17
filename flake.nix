@@ -19,7 +19,7 @@
 
         # Common packages we want to ensure work with LLVM
         packages = {
-          inherit (pkgs) linux mesa bash stdenv systemd;
+          inherit (pkgs) linux mesa bash stdenv systemd nix;
         };
       } // lib.optionalAttrs pkgs.stdenv.isLinux {
         nixosConfigurations = lib.nixosSystem {
