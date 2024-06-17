@@ -40,4 +40,10 @@ lib: final: prev:
         ++ [ "--llvm-libunwind=in-tree" ];
     });
   };
+
+  # PR: https://github.com/NixOS/nixpkgs/pull/320433
+  libnftnl = prev.libnftnl.overrideAttrs (f: p: {
+    configureFlags = (p.configureFlags or [])
+      ++ lib.optional (final.stdenv.cc.bintools.isLLVM && lib.versionAtLeast final.stdenv.cc.bintools.version "17") "LDFLAGS=-Wl,--undefined-version";
+  });
 }
