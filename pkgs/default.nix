@@ -37,7 +37,9 @@ lib: final: prev:
   rustc = prev.rustc.override {
     rustc-unwrapped = prev.rustc.unwrapped.overrideAttrs (f: p: {
       configureFlags = p.configureFlags
-        ++ [ "--llvm-libunwind=in-tree" ];
+        ++ [ "--llvm-libunwind=system" ];
+
+      NIX_LDFLAGS = [ "--push-state --as-needed -L${final.llvmPackages.libcxx}/lib -lc++ --pop-state" ];
 
       buildInputs = p.buildInputs
         ++ [ (final.runCommandLocal "libunwind-libgcc" {} ''
