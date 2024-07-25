@@ -51,4 +51,9 @@ lib: final: prev: with final;
       })
     ];
   });
+
+  # PR: https://github.com/NixOS/nixpkgs/pull/329979
+  nix = prev.nix.overrideAttrs (_: _: {
+    doInstallCheck = !(stdenv.targetPlatform.useLLVM or false);
+  });
 }
