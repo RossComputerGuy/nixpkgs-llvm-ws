@@ -74,7 +74,7 @@ lib: final: prev: with final;
         doFakeLibgcc = true;
       })
     ];
-    doCheck = !(stdenv.targetPlatform.useLLVM or false && stdenv.targetPlatform.isAarch64);
+    doCheck = !(stdenv.targetPlatform.useLLVM or false && (stdenv.targetPlatform.isAarch64 || stdenv.targetPlatform.isx86_64));
   });
 
   valgrind-light = prev.valgrind-light.overrideAttrs (f: p: {
@@ -83,6 +83,6 @@ lib: final: prev: with final;
         doFakeLibgcc = true;
       })
     ];
-    doCheck = !(stdenv.targetPlatform.useLLVM or false && stdenv.targetPlatform.isAarch64);
+    doCheck = !(stdenv.targetPlatform.useLLVM or false && (stdenv.targetPlatform.isAarch64 || stdenv.targetPlatform.isx86_64));
   });
 }
