@@ -1,16 +1,5 @@
 lib: final: prev:
 {
-  # PR: https://github.com/NixOS/nixpkgs/pull/319976
-  libbsd = prev.libbsd.overrideAttrs (f: p: {
-    configureFlags = (p.configureFlags or [])
-      ++ lib.optional (final.stdenv.cc.bintools.isLLVM && lib.versionAtLeast final.stdenv.cc.bintools.version "17") "LDFLAGS=-Wl,--undefined-version";
-  });
-
-  # PR: https://github.com/NixOS/nixpkgs/pull/304753
-  inherit (prev.callPackages ./os-specific/linux/apparmor {})
-    libapparmor apparmor-utils apparmor-bin-utils apparmor-parser apparmor-pam
-    apparmor-profiles apparmor-kernel-patches apparmorRulesFromClosure;
-
   # PR: https://github.com/NixOS/nixpkgs/pull/317942
   kexec-tools = (prev.kexec-tools.override { inherit (final) stdenv; }).overrideAttrs (f: p: {
     patches = p.patches ++ [
