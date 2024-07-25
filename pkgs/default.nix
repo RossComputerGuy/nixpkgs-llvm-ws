@@ -14,6 +14,7 @@ lib: final: prev: with final;
     });
   });
 
+  # PR: https://github.com/NixOS/nixpkgs/pull/329817
   busybox = prev.busybox.override {
     stdenv = overrideCC stdenv buildPackages.llvmPackages.clangNoLibcxx;
   };
