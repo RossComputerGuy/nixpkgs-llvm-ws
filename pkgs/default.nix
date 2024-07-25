@@ -66,4 +66,14 @@ lib: final: prev: with final;
     ];
     NIX_CFLAGS_COMPILE = "-lgcc";
   });
+
+  # PR: https://github.com/NixOS/nixpkgs/pull/329995
+  valgrind = prev.valgrind.overrideAttrs (f: p: {
+    buildInputs = p.buildInputs or [] ++ [
+      (llvmPackages.compiler-rt.override {
+        doFakeLibgcc = true;
+      })
+    ];
+    doCheck = !(stdenv.targetPlatform.useLLVM or false && stdenv.targetPlatform.isAarch64);
+  });
 }
