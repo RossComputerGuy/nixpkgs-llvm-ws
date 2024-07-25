@@ -122,4 +122,18 @@ lib: final: prev: with final;
       })
     ];
   });
+
+  linux = prev.linux.overrideAttrs (f: p: {
+    patches = p.patches or []
+      ++ lib.optional (lib.versionAtLeast prev.linux.version "6.6" &&
+                       stdenv.cc.bintools.isLLVM &&
+                       stdenv.targetPlatform.isx86_64)
+         (fetchpatch {
+           url = "https://github.com/ExpidusOS/nixpkgs/raw/ba135bc7bf69eec312e16da035a703af4857721f/pkgs/os-specific/linux/kernel/arch-x86-boot-setup-lld.patch";
+           hash = "sha256-waHN86Qd+yDbEZKBH71cWnDFVcGdwc7W3fb9Gdv4QVE=";
+         });
+
+    hardeningDisable = p.hardeningDisable or []
+      ++ lib.optional (stdenv.cc.isClang && stdenv.targetPlatform.parsed.cpu.family == "arm") "zerocallusedregs";
+  });
 }
