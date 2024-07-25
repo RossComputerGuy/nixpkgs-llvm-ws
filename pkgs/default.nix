@@ -18,4 +18,10 @@ lib: final: prev: with final;
   busybox = prev.busybox.override {
     stdenv = overrideCC stdenv buildPackages.llvmPackages.clangNoLibcxx;
   };
+
+  # PR: https://github.com/NixOS/nixpkgs/pull/329823
+  elfutils = prev.elfutils.overrideAttrs (f: p: {
+    configureFlags = p.configureFlags ++ lib.optional (stdenv.targetPlatform.useLLVM or false) "--disable-demangler";
+    NIX_CFLAGS_COMPILE = lib.optionalString (stdenv.targetPlatform.useLLVM or false) "-Wno-unused-private-field";
+  });
 }
