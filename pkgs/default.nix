@@ -105,4 +105,14 @@ lib: final: prev: with final;
       })
     ];
   });
+
+  # PR: https://github.com/NixOS/nixpkgs/pull/330014
+  libunwind = prev.libunwind.overrideAttrs (f: p: {
+    patches = p.patches or [] ++ [
+      (fetchpatch {
+        url = "https://github.com/libunwind/libunwind/pull/770/commits/a69d0f14c9e6c46e82ba6e02fcdedb2eb63b7f7f.patch";
+        hash = "sha256-9oBZimCXonNN++jJs3emp9w+q1aj3eNzvSKPgh92itA=";
+      })
+    ];
+  });
 }
