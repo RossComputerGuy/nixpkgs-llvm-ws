@@ -56,4 +56,14 @@ lib: final: prev: with final;
   nix = prev.nix.overrideAttrs (_: _: {
     doInstallCheck = !(stdenv.targetPlatform.useLLVM or false);
   });
+
+  # PR: https://github.com/NixOS/nixpkgs/pull/329993
+  sourceHighlight = prev.sourceHighlight.overrideAttrs (f: p: {
+    buildInputs = p.buildInputs or [] ++ [
+      (llvmPackages.compiler-rt.override {
+        doFakeLibgcc = true;
+      })
+    ];
+    NIX_CFLAGS_COMPILE = "-lgcc";
+  });
 }
