@@ -13,4 +13,8 @@ lib: final: prev: with final;
           ++ lib.optional (stdenv.targetPlatform.useLLVM or false) "ac_cv_path_RAWCPP=cpp";
     });
   });
+
+  busybox = prev.busybox.override {
+    stdenv = overrideCC stdenv buildPackages.llvmPackages.clangNoLibcxx;
+  };
 }
