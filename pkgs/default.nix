@@ -29,4 +29,26 @@ lib: final: prev: with final;
   libseccomp = prev.libseccomp.overrideAttrs (_: _: {
     doCheck = !(stdenv.targetPlatform.useLLVM or false);
   });
+
+  # PR: https://github.com/NixOS/nixpkgs/pull/329961
+  boost = (prev.boost.override {
+    boost-build = (prev.buildPackages.boost-build.override {
+      useBoost = prev.buildPackages.boost;
+    }).overrideAttrs (f: p: {
+      patches = p.patches or [] ++ [
+        (fetchpatch {
+          url = "https://github.com/NixOS/nixpkgs/raw/3ca581d85960ff02cdfb039670006ba13096be95/pkgs/development/libraries/boost/fix-clang-target.patch";
+          relative = "tools/build";
+          hash = "sha256-4+KvKpV7c0D/AcHZeDMYZLS9suYNddwaqEfwxjPcYhk=";
+        })
+      ];
+    });
+  }).overrideAttrs (f: p: {
+    patches = p.patches or [] ++ [
+      (fetchpatch {
+        url = "https://github.com/NixOS/nixpkgs/raw/3ca581d85960ff02cdfb039670006ba13096be95/pkgs/development/libraries/boost/fix-clang-target.patch";
+        hash = "sha256-xKGjYPMcbgBzWOOYnGpC5PyKvs70P7N+Sg3vjNUxDPg=";
+      })
+    ];
+  });
 }
