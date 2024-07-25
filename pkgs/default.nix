@@ -96,4 +96,13 @@ lib: final: prev: with final;
     NIX_CFLAGS_COMPILE = lib.optionalString (stdenv.targetPlatform.useLLVM or false) "-DHAVE_SECURE_GETENV";
     NIX_LDFLAGS = lib.optionalString (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") "--undefined-version";
   });
+
+  # PR: https://github.com/NixOS/nixpkgs/pull/330008
+  systemd = prev.systemd.overrideAttrs (f: p: {
+    buildInputs = p.buildInputs or [] ++ [
+      (llvmPackages.compiler-rt.override {
+        doFakeLibgcc = true;
+      })
+    ];
+  });
 }
