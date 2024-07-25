@@ -1,0 +1,5 @@
+builds:
+ exclude: []
+ include:
+  - '*.aarch64-linux.*'
+  - '*.x86_64-linux.*'
