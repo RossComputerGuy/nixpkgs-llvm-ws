@@ -85,4 +85,15 @@ lib: final: prev: with final;
     ];
     doCheck = !(stdenv.targetPlatform.useLLVM or false && (stdenv.targetPlatform.isAarch64 || stdenv.targetPlatform.isx86_64));
   });
+
+  # PR: https://github.com/NixOS/nixpkgs/pull/330003
+  libva = prev.libva.overrideAttrs (f: p: {
+    NIX_CFLAGS_COMPILE = lib.optionalString (stdenv.targetPlatform.useLLVM or false) "-DHAVE_SECURE_GETENV";
+    NIX_LDFLAGS = lib.optionalString (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") "--undefined-version";
+  });
+
+  libva-minimal = prev.libva-minimal.overrideAttrs (f: p: {
+    NIX_CFLAGS_COMPILE = lib.optionalString (stdenv.targetPlatform.useLLVM or false) "-DHAVE_SECURE_GETENV";
+    NIX_LDFLAGS = lib.optionalString (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") "--undefined-version";
+  });
 }
