@@ -76,4 +76,13 @@ lib: final: prev: with final;
     ];
     doCheck = !(stdenv.targetPlatform.useLLVM or false && stdenv.targetPlatform.isAarch64);
   });
+
+  valgrind-light = prev.valgrind-light.overrideAttrs (f: p: {
+    buildInputs = p.buildInputs or [] ++ [
+      (llvmPackages.compiler-rt.override {
+        doFakeLibgcc = true;
+      })
+    ];
+    doCheck = !(stdenv.targetPlatform.useLLVM or false && stdenv.targetPlatform.isAarch64);
+  });
 }
