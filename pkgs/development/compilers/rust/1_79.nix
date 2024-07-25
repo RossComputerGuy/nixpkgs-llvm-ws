@@ -16,6 +16,7 @@
 , makeRustPlatform
 , wrapRustcWith
 , llvmPackages_18, llvm_18
+, pkgs
 } @ args:
 let
   llvmSharedFor = pkgSet: pkgSet.llvmPackages_18.libllvm.override ({
@@ -26,6 +27,8 @@ let
   });
 in
 import ./default.nix {
+  inherit pkgs;
+
   rustcVersion = "1.79.0";
   rustcSha256 = "sha256-Fy7PPH0fnZ+xbNKmKIaXgmcEFt7QEp5SSoZ1H5YUSMA=";
 

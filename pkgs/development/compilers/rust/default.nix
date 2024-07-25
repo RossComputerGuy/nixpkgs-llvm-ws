@@ -10,6 +10,7 @@
 , llvmSharedForHost
 , llvmSharedForTarget
 , llvmPackages # Exposed through rustc for LTO in Firefox
+, pkgs
 }:
 { stdenv, lib
 , newScope, callPackage
@@ -20,11 +21,12 @@
 , pkgsTargetTarget
 , makeRustPlatform
 , wrapRustcWith
+, pkgs
 }:
 
 let
   # Use `import` to make sure no packages sneak in here.
-  lib' = import ../../../build-support/rust/lib {
+  lib' = import "${pkgs.path}/pkgs/build-support/rust/lib" {
     inherit lib stdenv pkgsBuildHost pkgsBuildTarget pkgsTargetTarget;
   };
   # Allow faster cross compiler generation by reusing Build artifacts

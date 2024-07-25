@@ -6,6 +6,13 @@ lib: final: prev: with final;
     llvm_18 = llvmPackages_18.libllvm;
   };
 
+  rust = rust_1_79;
+
+  rustPackages_1_79 = rust_1_79.packages.stable;
+  rustPackages = rustPackages_1_79;
+
+  inherit (rustPackages) cargo cargo-auditable cargo-auditable-cargo-wrapper clippy rustc rustPlatform;
+
   xorg = prev.xorg.overrideScope (f: p: {
     # PR: https://github.com/NixOS/nixpkgs/pull/329584
     libX11 = p.libX11.overrideAttrs (attrs: {
