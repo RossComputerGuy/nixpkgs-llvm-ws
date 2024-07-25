@@ -24,4 +24,9 @@ lib: final: prev: with final;
     configureFlags = p.configureFlags ++ lib.optional (stdenv.targetPlatform.useLLVM or false) "--disable-demangler";
     NIX_CFLAGS_COMPILE = lib.optionalString (stdenv.targetPlatform.useLLVM or false) "-Wno-unused-private-field";
   });
+
+  # PR: https://github.com/NixOS/nixpkgs/pull/329827
+  libseccomp = prev.libseccomp.overrideAttrs (_: _: {
+    doCheck = !(stdenv.targetPlatform.useLLVM or false);
+  });
 }
