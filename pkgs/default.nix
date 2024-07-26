@@ -132,9 +132,9 @@ lib: final: prev: with final;
       ++ lib.optional (lib.versionAtLeast prev.linux.version "6.6" &&
                        stdenv.cc.bintools.isLLVM &&
                        stdenv.targetPlatform.isx86_64)
-         (fetchpatch {
-           url = "https://github.com/NixOS/nixpkgs/raw/731d1dba73446fa97b9b6742433219816c3d49ea/pkgs/os-specific/linux/kernel/arch-x86-boot-setup-ld.patch";
-           hash = "sha256-WR3bLR97jIqjcaSCYId6KfwkWpUZJfsnHGvdpIRzcG8=";
+         (fetchurl {
+           url = "https://lore.kernel.org/all/20240208012057.2754421-2-yshuiv7@gmail.com/t.mbox.gz";
+           hash = "sha256-DVC9hZ5n+vyS0jroygN2tCAHPPiL+oGbezxdm2yM6s8=";
          });
 
     hardeningDisable = p.hardeningDisable or []
