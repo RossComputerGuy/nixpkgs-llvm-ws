@@ -22,6 +22,28 @@ lib: final: prev: with final;
        configureFlags = attrs.configureFlags or []
           ++ lib.optional (stdenv.targetPlatform.useLLVM or false) "ac_cv_path_RAWCPP=cpp";
     });
+    # PR: https://github.com/NixOS/nixpkgs/pull/330289
+    libXt = (p.libXt.override {
+      stdenv = overrideCC stdenv (stdenv.cc.override {
+        extraBuildCommands = ''
+          substituteAll ${fetchurl {
+            url = "https://github.com/ExpidusOS/nixpkgs/raw/54f2c3cd0d5ea3c8cde91ee78fb15dcabac6924d/pkgs/build-support/cc-wrapper/add-clang-cc-cflags-before.sh";
+            hash = "sha256-rQoUWv2Sdh5/+G6d/Mb39i7cmDEukPKfMRJ73zczUoM=";
+          }} $out/nix-support/add-local-cc-cflags-before.sh
+
+          rsrc="$out/resource-root"
+          mkdir "$rsrc"
+          ln -s "${stdenv.cc.cc.lib}/lib/clang/${lib.versions.major stdenv.cc.cc.version}/include" "$rsrc"
+          echo "-resource-dir=$rsrc" >> $out/nix-support/cc-cflags
+
+          ln -s "${llvmPackages.compiler-rt.out}/lib" "$rsrc/lib"
+          ln -s "${llvmPackages.compiler-rt.out}/share" "$rsrc/share"
+        '';
+      });
+    }).overrideAttrs (attrs: {
+      configureFlags = attrs.configureFlags or []
+        ++ lib.optional (stdenv.targetPlatform.useLLVM or false) "ac_cv_path_RAWCPP=cpp";
+    });
   });
 
   # PR: https://github.com/NixOS/nixpkgs/pull/329817
