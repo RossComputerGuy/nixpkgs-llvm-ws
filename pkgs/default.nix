@@ -1,5 +1,8 @@
 lib: final: prev: with final;
 {
+  # PR: https://github.com/NixOS/nixpkgs/pull/330037
+  wrapRustcWith = { rustc-unwrapped, ... } @ args: callPackage ./build-support/rust/rustc-wrapper args;
+
   # PR: https://github.com/NixOS/nixpkgs/pull/320432
   rust_1_79 = callPackage ./development/compilers/rust/1_79.nix {
     inherit (darwin.apple_sdk.frameworks) CoreFoundation Security SystemConfiguration;
@@ -123,14 +126,15 @@ lib: final: prev: with final;
     ];
   });
 
+  # PR: https://github.com/NixOS/nixpkgs/pull/330048
   linux = prev.linux.overrideAttrs (f: p: {
     patches = p.patches or []
       ++ lib.optional (lib.versionAtLeast prev.linux.version "6.6" &&
                        stdenv.cc.bintools.isLLVM &&
                        stdenv.targetPlatform.isx86_64)
          (fetchpatch {
-           url = "https://github.com/ExpidusOS/nixpkgs/raw/ba135bc7bf69eec312e16da035a703af4857721f/pkgs/os-specific/linux/kernel/arch-x86-boot-setup-lld.patch";
-           hash = "sha256-waHN86Qd+yDbEZKBH71cWnDFVcGdwc7W3fb9Gdv4QVE=";
+           url = "https://github.com/NixOS/nixpkgs/raw/731d1dba73446fa97b9b6742433219816c3d49ea/pkgs/os-specific/linux/kernel/arch-x86-boot-setup-ld.patch";
+           hash = "sha256-WR3bLR97jIqjcaSCYId6KfwkWpUZJfsnHGvdpIRzcG8=";
          });
 
     hardeningDisable = p.hardeningDisable or []
