@@ -167,5 +167,7 @@ lib: final: prev: with final;
       export PKG_CONFIG_PATH_FOR_BUILD="${glslang.dev}/lib/pkgconfig:$PKG_CONFIG_PATH_FOR_BUILD"
       ${p.preConfigure}
     '';
+  } // lib.optionalAttrs (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") {
+    NIX_LDFLAGS = "--undefined-version";
   });
 }
