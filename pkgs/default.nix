@@ -180,4 +180,15 @@ lib: final: prev: with final;
   libselinux = prev.libselinux.overrideAttrs (f: p: lib.optionalAttrs (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") {
     NIX_LDFLAGS = "--undefined-version";
   });
+
+  # PR: https://github.com/NixOS/nixpkgs/pull/330252
+  x265 = prev.x265.overrideAttrs (f: p: {
+    patches = p.patches or []
+      ++ lib.optional stdenv.cc.isClang (fetchpatch {
+        url = "https://github.com/NixOS/nixpkgs/raw/d5a96e30b0daf62674856412a45e8a5a876ee7f7/pkgs/development/libraries/x265/fix-clang-asm.patch";
+        hash = "sha256-iAdfwPAuAHrm0RUqFqbaAlVE06WNFdD8EAWaknomQpI=";
+      });
+    cmakeFlags = p.cmakeFlags or []
+      ++ lib.optional stdenv.cc.isClang "-DCMAKE_ASM_COMPILER=${gccStdenv.cc}/bin/${gccStdenv.cc.targetPrefix}gcc";
+  });
 }
