@@ -140,4 +140,24 @@ lib: final: prev: with final;
     hardeningDisable = p.hardeningDisable or []
       ++ lib.optional (stdenv.cc.isClang && stdenv.targetPlatform.parsed.cpu.family == "arm") "zerocallusedregs";
   });
+
+  # PR: https://github.com/NixOS/nixpkgs/pull/330065
+  glslang = prev.glslang.overrideAttrs (f: p: {
+    outputs = [ "out" "dev" ];
+
+    postInstall = ''
+      mkdir -p $dev/lib $dev/include/External
+      mv $out/lib/pkgconfig $dev/lib/pkgconfig
+    '';
+
+    postFixup = ''
+      substituteInPlace $out/lib/pkgconfig/*.pc \
+        --replace '=''${prefix}//' '=/'
+      substituteInPlace $dev/lib/pkgconfig/*.pc \
+        --replace-fail '=''${prefix}//' '=/' \
+        --replace-fail "includedir=$dev/$dev" "includedir=$dev"
+      # add a symlink for backwards compatibility
+      ln -s $out/bin/glslang $out/bin/glslangValidator
+    '';
+  });
 }
