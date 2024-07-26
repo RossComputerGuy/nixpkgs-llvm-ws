@@ -191,4 +191,13 @@ lib: final: prev: with final;
     cmakeFlags = p.cmakeFlags or []
       ++ lib.optional stdenv.cc.isClang "-DCMAKE_ASM_COMPILER=${gccStdenv.cc}/bin/${gccStdenv.cc.targetPrefix}gcc";
   });
+
+  # PR: https://github.com/NixOS/nixpkgs/pull/330266
+  graphite2 = prev.graphite2.overrideAttrs (f: p: {
+    buildInputs = p.buildInputs or [] ++ [
+      (llvmPackages.compiler-rt.override {
+        doFakeLibgcc = true;
+      })
+    ];
+  });
 }
