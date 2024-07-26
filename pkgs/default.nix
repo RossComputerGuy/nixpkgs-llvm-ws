@@ -160,4 +160,12 @@ lib: final: prev: with final;
       ln -s $out/bin/glslang $out/bin/glslangValidator
     '';
   });
+
+  # PR: https://github.com/NixOS/nixpkgs/pull/330112
+  mesa = prev.mesa.overrideAttrs (f: p: {
+    preConfigure = ''
+      export PKG_CONFIG_PATH_FOR_BUILD="${glslang.dev}/lib/pkgconfig:$PKG_CONFIG_PATH_FOR_BUILD"
+      ${p.preConfigure}
+    '';
+  });
 }
