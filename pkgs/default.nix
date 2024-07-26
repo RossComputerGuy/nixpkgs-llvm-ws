@@ -175,4 +175,9 @@ lib: final: prev: with final;
   tremor = prev.tremor.overrideAttrs (f: p: {
     configureFlags = lib.optional (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") "LDFLAGS=-Wl,--undefined-version";
   });
+
+  # PR: https://github.com/NixOS/nixpkgs/pull/330239
+  libselinux = prev.libselinux.overrideAttrs (f: p: lib.optionalAttrs (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") {
+    NIX_LDFLAGS = "--undefined-version";
+  });
 }
