@@ -227,4 +227,14 @@ lib: final: prev: with final;
   makeBinaryWrapper = prev.makeBinaryWrapper.override {
     inherit (stdenv) cc;
   };
+
+  # PR: https://github.com/NixOS/nixpkgs/pull/330310
+  pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+    (pythonFinal: pythonPrev: {
+      mako = pythonPrev.mako.overrideAttrs (attrs: {
+        disabledTests = attrs.disabledTests or []
+          ++ lib.optional (stdenv.targetPlatform.useLLVM or false) "test_future_import";
+      });
+    })
+  ];
 }
