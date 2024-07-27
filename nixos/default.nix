@@ -14,5 +14,7 @@
       stateVersion = lib.version;
       disableInstallerTools = true;
     };
+
+    documentation.enable = false;
   };
 }
