@@ -243,4 +243,16 @@ lib: final: prev: with final;
     configureFlags = p.configureFlags or []
       ++ lib.optional stdenv.cc.isClang "CFLAGS=-Wno-unused-function";
   });
+
+  # PR: https://github.com/NixOS/nixpkgs/pull/330316
+  libjack2 = prev.libjack2.overrideAttrs (f: p: {
+    buildInputs = p.buildInputs or []
+      ++ lib.optional (stdenv.targetPlatform.useLLVM or false)
+        (runCommand "llvm-libstdcxx" {} ''
+          mkdir -p $out/lib
+          ln -s ${llvmPackages.libcxx}/lib/libc++.so $out/lib/libstdc++.so
+          ln -s ${llvmPackages.libcxx}/lib/libc++.so.1 $out/lib/libstdc++.so.1
+          ln -s ${llvmPackages.libcxx}/lib/libc++.so.1.0 $out/lib/libstdc++.so.1.0
+        '');
+  });
 }
