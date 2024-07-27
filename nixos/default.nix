@@ -17,6 +17,9 @@
 
     documentation.enable = false;
 
-    virtualisation.qemu.package = pkgs.buildPackages.qemu;
+    virtualisation.qemu = {
+      package = pkgs.buildPackages.qemu;
+      guestAgent.enable = false;
+    };
   };
 }
