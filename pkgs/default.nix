@@ -149,18 +149,20 @@ lib: final: prev: with final;
   });
 
   # PR: https://github.com/NixOS/nixpkgs/pull/330048
-  linux = prev.linux.overrideAttrs (f: p: {
-    patches = p.patches or []
-      ++ lib.optional (lib.versionAtLeast prev.linux.version "6.6" &&
+  linuxPackages = prev.linuxPackages.extend (self: super: {
+    kernel = super.kernel.overrideAttrs (f: p: {
+      patches = p.patches or []
+        ++ lib.optional (lib.versionAtLeast f.version "6.6" &&
                        stdenv.cc.bintools.isLLVM &&
                        stdenv.targetPlatform.isx86_64)
-         (fetchurl {
-           url = "https://lore.kernel.org/all/20240208012057.2754421-2-yshuiv7@gmail.com/t.mbox.gz";
-           hash = "sha256-DVC9hZ5n+vyS0jroygN2tCAHPPiL+oGbezxdm2yM6s8=";
-         });
+          (fetchurl {
+            url = "https://lore.kernel.org/all/20240208012057.2754421-2-yshuiv7@gmail.com/t.mbox.gz";
+            hash = "sha256-DVC9hZ5n+vyS0jroygN2tCAHPPiL+oGbezxdm2yM6s8=";
+          });
 
-    hardeningDisable = p.hardeningDisable or []
-      ++ lib.optional (stdenv.cc.isClang && stdenv.targetPlatform.parsed.cpu.family == "arm") "zerocallusedregs";
+      hardeningDisable = p.hardeningDisable or []
+        ++ lib.optional (stdenv.cc.isClang && stdenv.targetPlatform.parsed.cpu.family == "arm") "zerocallusedregs";
+    });
   });
 
   # PR: https://github.com/NixOS/nixpkgs/pull/330065
