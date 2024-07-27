@@ -237,4 +237,10 @@ lib: final: prev: with final;
       });
     })
   ];
+
+  # PR: https://github.com/NixOS/nixpkgs/pull/330314
+  strace = prev.strace.overrideAttrs (f: p: {
+    configureFlags = p.configureFlags or []
+      ++ lib.optional stdenv.cc.isClang "CFLAGS=-Wno-unused-function";
+  });
 }
