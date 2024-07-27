@@ -1,6 +1,8 @@
 { config, lib, pkgs, ... }:
 {
   config = {
+    boot.loader.grub.enable = false;
+
     users.users.nixos = {
       createHome = true;
       isNormalUser = true;
