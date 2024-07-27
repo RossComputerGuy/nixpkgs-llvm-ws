@@ -10,6 +10,8 @@
       initialPassword = "nixos";
     };
 
+    programs.command-not-found.enable = false;
+
     system = {
       stateVersion = lib.version;
       disableInstallerTools = true;
