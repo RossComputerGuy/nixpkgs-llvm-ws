@@ -23,9 +23,5 @@
       package = pkgs.buildPackages.qemu;
       guestAgent.enable = false;
     };
-
-    i18n.glibcLocales = pkgs.glibcLocales.override {
-      stdenv = pkgs.gccStdenv;
-    };
   };
 }

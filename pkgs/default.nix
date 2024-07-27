@@ -262,4 +262,14 @@ lib: final: prev: with final;
     configureFlags = p.configureFlags or []
       ++ lib.optional stdenv.cc.isClang "CFLAGS=-Wno-implicit-function-declaration";
   });
+
+  glibcLocales = (prev.glibcLocales.override {
+    stdenv = gccStdenv;
+  }).overrideAttrs (f: p: {
+    configureFlags = p.configureFlags or []
+      ++ lib.optionals stdenv.cc.isClang [
+        "--enable-kernel=3.10.0"
+        "--with-headers=${linuxHeaders}/include"
+      ];
+  });
 }
