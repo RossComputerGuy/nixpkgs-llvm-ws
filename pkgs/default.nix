@@ -222,4 +222,9 @@ lib: final: prev: with final;
       })
     ];
   });
+
+  # PR: https://github.com/NixOS/nixpkgs/pull/330305
+  makeBinaryWrapper = prev.makeBinaryWrapper.override {
+    inherit (stdenv) cc;
+  };
 }
