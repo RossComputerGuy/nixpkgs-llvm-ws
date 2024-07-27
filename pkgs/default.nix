@@ -255,4 +255,9 @@ lib: final: prev: with final;
           ln -s ${llvmPackages.libcxx}/lib/libc++.so.1.0 $out/lib/libstdc++.so.1.0
         '');
   });
+
+  cyrus_sasl = prev.cyrus_sasl.overrideAttrs (f: p: {
+    configureFlags = p.configureFlags or []
+      ++ lib.optional stdenv.cc.isClang "CFLAGS=-Wno-implicit-function-declaration";
+  });
 }
