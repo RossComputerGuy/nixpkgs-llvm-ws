@@ -10,6 +10,9 @@
       initialPassword = "nixos";
     };
 
-    system.stateVersion = lib.version;
+    system = {
+      stateVersion = lib.version;
+      disableInstallerTools = true;
+    };
   };
 }
