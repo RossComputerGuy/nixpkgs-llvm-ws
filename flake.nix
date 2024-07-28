@@ -21,7 +21,7 @@
     let
       inherit (nixpkgs) lib;
     in
-    (flake-utils.lib.eachDefaultSystem (
+    (flake-utils.lib.eachSystem (lib.remove "x86_64-darwin" flake-utils.lib.defaultSystems) (
       system:
       let
         pkgsHost = nixpkgs.legacyPackages.${system};
@@ -63,11 +63,14 @@
     ))
     // {
       hydraJobs = {
-        nixos-vm = lib.mapAttrs (
-          _: nixos: lib.hydraJob nixos.config.system.build.vm
-        ) self.nixosConfigurations;
-        linux = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.linux) self.legacyPackages;
-        mesa = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.mesa) self.legacyPackages;
+        bash = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.bash) self.legacyPackages;
+        coreutils = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.coreutils) self.legacyPackages;
+        sqlite = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.sqlite) self.legacyPackages;
+        #nixos-vm = lib.mapAttrs (
+        #  _: nixos: lib.hydraJob nixos.config.system.build.vm
+        #) self.nixosConfigurations;
+        #linux = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.linux) self.legacyPackages;
+        #mesa = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.mesa) self.legacyPackages;
       };
     };
 }
