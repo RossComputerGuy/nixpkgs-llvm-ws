@@ -65,7 +65,11 @@
       hydraJobs = {
         bash = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.bash) self.legacyPackages;
         coreutils = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.coreutils) self.legacyPackages;
+        pcre2 = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.pcre2) self.legacyPackages;
+        pkg-config = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.pkg-config) self.legacyPackages;
+        psutils = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.psutils) self.legacyPackages;
         sqlite = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.sqlite) self.legacyPackages;
+        util-linux = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.util-linux) self.legacyPackages;
         #nixos-vm = lib.mapAttrs (
         #  _: nixos: lib.hydraJob nixos.config.system.build.vm
         #) self.nixosConfigurations;
