@@ -5,9 +5,9 @@ Goal is to ensure the majority of Nixpkgs works under `pkgsLLVM` or with LLVM.
 
 ## Roadmap
 
-Current roadmap as of 2024-06-15:
+Current roadmap as of 2024-07-27:
 
-- [ ] Working minimal NixOS config
+- [x] Working minimal NixOS config
 - [ ] Enable Hydra testing
 - [ ] Automated build failure reports
 - [ ] Working graphical NixOS config

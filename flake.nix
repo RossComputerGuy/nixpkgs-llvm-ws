@@ -16,7 +16,8 @@
       let
         inherit (nixpkgs) lib;
 
-        pkgs = nixpkgs.legacyPackages.${system}.pkgsLLVM.appendOverlays [
+        pkgsHost = nixpkgs.legacyPackages.${system};
+        pkgs = pkgsHost.pkgsLLVM.appendOverlays [
           (import ./pkgs/default.nix lib)
         ];
       in {
@@ -32,6 +33,15 @@
           modules = [
             "${nixpkgs}/nixos/modules/virtualisation/qemu-vm.nix"
             ./nixos/default.nix
+            {
+              virtualisation = {
+                qemu = {
+                  package = pkgsHost.qemu;
+                  guestAgent.enable = false;
+                };
+                host.pkgs = pkgsHost;
+              };
+            }
           ];
         };
       });

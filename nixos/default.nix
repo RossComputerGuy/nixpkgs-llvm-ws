@@ -18,13 +18,5 @@
     };
 
     documentation.enable = false;
-
-    virtualisation = {
-      qemu = {
-        package = pkgs.buildPackages.qemu;
-        guestAgent.enable = false;
-      };
-      host.pkgs = pkgs.buildPackages;
-    };
   };
 }
