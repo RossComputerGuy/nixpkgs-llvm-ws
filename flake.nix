@@ -20,8 +20,12 @@
     }@inputs:
     let
       inherit (nixpkgs) lib;
+      systems = [
+        "aarch64-linux"
+        "x86_64-linux"
+      ];
     in
-    (flake-utils.lib.eachSystem [ "aarch64-linux" "x86_64-linux" ] (
+    (flake-utils.lib.eachSystem systems (
       system:
       let
         pkgsHost = nixpkgs.legacyPackages.${system};
