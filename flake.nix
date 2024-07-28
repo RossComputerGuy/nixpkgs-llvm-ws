@@ -11,23 +11,38 @@
     extra-trusted-public-keys = [ "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=" ];
   };
 
-  outputs = { self, nixpkgs, flake-utils, ... }@inputs:
-    flake-utils.lib.eachDefaultSystem (system:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+      ...
+    }@inputs:
+    let
+      inherit (nixpkgs) lib;
+    in
+    (flake-utils.lib.eachDefaultSystem (
+      system:
       let
-        inherit (nixpkgs) lib;
-
         pkgsHost = nixpkgs.legacyPackages.${system};
-        pkgs = pkgsHost.pkgsLLVM.appendOverlays [
-          (import ./pkgs/default.nix lib)
-        ];
-      in {
+        pkgs = pkgsHost.pkgsLLVM.appendOverlays [ (import ./pkgs/default.nix lib) ];
+      in
+      {
         legacyPackages = pkgs;
 
         # Common packages we want to ensure work with LLVM
         packages = {
-          inherit (pkgs) linux mesa bash stdenv systemd nix qemu_kvm;
+          inherit (pkgs)
+            linux
+            mesa
+            bash
+            stdenv
+            systemd
+            nix
+            ;
         };
-      } // lib.optionalAttrs pkgs.stdenv.isLinux {
+      }
+      // lib.optionalAttrs pkgs.stdenv.isLinux {
         nixosConfigurations = lib.nixosSystem {
           inherit pkgs system;
           modules = [
@@ -44,5 +59,13 @@
             }
           ];
         };
-      });
+      }
+    ))
+    // {
+      hydraJobs = {
+        nixos-vm = lib.mapAttrs (
+          _: nixos: lib.hydraJob nixos.config.system.build.vm
+        ) self.nixosConfigurations;
+      };
+    };
 }
