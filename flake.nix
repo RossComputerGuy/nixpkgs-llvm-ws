@@ -66,6 +66,8 @@
         nixos-vm = lib.mapAttrs (
           _: nixos: lib.hydraJob nixos.config.system.build.vm
         ) self.nixosConfigurations;
+        linux = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.linux) self.legacyPackages;
+        mesa = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.mesa) self.legacyPackages;
       };
     };
 }
