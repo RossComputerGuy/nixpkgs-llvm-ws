@@ -74,6 +74,9 @@
         psutils = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.psutils) self.legacyPackages;
         sqlite = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.sqlite) self.legacyPackages;
         util-linux = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.util-linux) self.legacyPackages;
+        nixos-toplevel = lib.mapAttrs (
+          _: nixos: lib.hydraJob nixos.config.system.build.toplevel
+        ) self.nixosConfigurations;
         nixos-vm = lib.mapAttrs (
           _: nixos: lib.hydraJob nixos.config.system.build.vm
         ) self.nixosConfigurations;
