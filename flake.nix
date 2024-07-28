@@ -21,7 +21,7 @@
     let
       inherit (nixpkgs) lib;
     in
-    (flake-utils.lib.eachSystem (lib.remove "x86_64-darwin" flake-utils.lib.defaultSystems) (
+    (flake-utils.lib.eachSystem [ "aarch64-linux" "x86_64-linux" ] (
       system:
       let
         pkgsHost = nixpkgs.legacyPackages.${system};
