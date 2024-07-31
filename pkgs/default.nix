@@ -96,18 +96,24 @@ lib: final: prev: with final;
   # PR: https://github.com/NixOS/nixpkgs/pull/329995
   valgrind = prev.valgrind.overrideAttrs (f: p: {
     buildInputs = p.buildInputs or [] ++ [
-      (llvmPackages.compiler-rt.override {
+      ((llvmPackages.compiler-rt.override {
         doFakeLibgcc = true;
-      })
+      }).overrideAttrs (f: p: {
+        hardeningDisable = p.hardeningDisable or []
+          ++ [ "stackprotector" ];
+      }))
     ];
     doCheck = !(stdenv.targetPlatform.useLLVM or false && (stdenv.targetPlatform.isAarch64 || stdenv.targetPlatform.isx86_64));
   });
 
   valgrind-light = prev.valgrind-light.overrideAttrs (f: p: {
     buildInputs = p.buildInputs or [] ++ [
-      (llvmPackages.compiler-rt.override {
+      ((llvmPackages.compiler-rt.override {
         doFakeLibgcc = true;
-      })
+      }).overrideAttrs (f: p: {
+        hardeningDisable = p.hardeningDisable or []
+          ++ [ "stackprotector" ];
+      }))
     ];
     doCheck = !(stdenv.targetPlatform.useLLVM or false && (stdenv.targetPlatform.isAarch64 || stdenv.targetPlatform.isx86_64));
   });
