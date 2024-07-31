@@ -249,4 +249,18 @@ lib: final: prev: with final;
         "--with-headers=${linuxHeaders}/include"
       ];
   });
+
+  # PR: https://github.com/NixOS/nixpkgs/pull/331192
+  elfutils = prev.elfutils.overrideAttrs (f: p: {
+    patches = p.patches or []
+      ++ [
+        (fetchpatch {
+          url = "https://github.com/NixOS/nixpkgs/raw/489a754dfeba20fab46ab075efa653ad464018b9/pkgs/development/tools/misc/elfutils/cxx-header-collision.patch";
+          hash = "sha256-2RPFEj7ugkh5FURTunUHO+OaHAT7SR0QIEiCCLy4q/c=";
+        })
+      ];
+
+    nativeBuildInputs = p.nativeBuildInputs or []
+      ++ [ autoreconfHook ];
+  });
 }
