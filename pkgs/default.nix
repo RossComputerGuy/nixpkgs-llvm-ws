@@ -98,9 +98,18 @@ lib: final: prev: with final;
     buildInputs = p.buildInputs or [] ++ [
       ((llvmPackages.compiler-rt.override {
         doFakeLibgcc = true;
+        stdenv = llvmPackages.compiler-rt-no-libc.stdenv.override {
+          hostPlatform = llvmPackages.compiler-rt-no-libc.stdenv.hostPlatform // {
+            parsed = {
+              kernel.name = "none";
+              inherit (llvmPackages.compiler-rt-no-libc.stdenv.hostPlatform.parsed) cpu;
+            };
+            useLLVM = false;
+          };
+        };
       }).overrideAttrs (f: p: {
         hardeningDisable = p.hardeningDisable or []
-          ++ [ "stackprotector" ];
+          ++ [ "pie" "stackprotector" ];
       }))
     ];
     doCheck = !(stdenv.targetPlatform.useLLVM or false && (stdenv.targetPlatform.isAarch64 || stdenv.targetPlatform.isx86_64));
@@ -108,11 +117,20 @@ lib: final: prev: with final;
 
   valgrind-light = prev.valgrind-light.overrideAttrs (f: p: {
     buildInputs = p.buildInputs or [] ++ [
-      ((llvmPackages.compiler-rt.override {
+      ((llvmPackages.compiler-rt-no-libc.override {
         doFakeLibgcc = true;
+        stdenv = llvmPackages.compiler-rt-no-libc.stdenv.override {
+          hostPlatform = llvmPackages.compiler-rt-no-libc.stdenv.hostPlatform // {
+            parsed = {
+              kernel.name = "none";
+              inherit (llvmPackages.compiler-rt-no-libc.stdenv.hostPlatform.parsed) cpu;
+            };
+            useLLVM = false;
+          };
+        };
       }).overrideAttrs (f: p: {
         hardeningDisable = p.hardeningDisable or []
-          ++ [ "stackprotector" ];
+          ++ [ "pie" "stackprotector" ];
       }))
     ];
     doCheck = !(stdenv.targetPlatform.useLLVM or false && (stdenv.targetPlatform.isAarch64 || stdenv.targetPlatform.isx86_64));
@@ -167,11 +185,12 @@ lib: final: prev: with final;
 
   # PR: https://github.com/NixOS/nixpkgs/pull/330065
   glslang = prev.glslang.overrideAttrs (f: p: {
-    outputs = [ "out" "dev" ];
+    outputs = [ "out" "dev" "lib" ];
 
     postInstall = ''
-      mkdir -p $dev/lib $dev/include/External
-      mv $out/lib/pkgconfig $dev/lib/pkgconfig
+      mkdir -p $dev/include/External
+      moveToOutput lib/pkgconfig "''${!outputDev}"
+      moveToOutput lib/cmake "''${!outputDev}"
     '';
 
     postFixup = ''
@@ -187,10 +206,10 @@ lib: final: prev: with final;
 
   # PR: https://github.com/NixOS/nixpkgs/pull/330112
   mesa = prev.mesa.overrideAttrs (f: p: {
-    preConfigure = ''
-      export PKG_CONFIG_PATH_FOR_BUILD="${glslang.dev}/lib/pkgconfig:$PKG_CONFIG_PATH_FOR_BUILD"
-      ${p.preConfigure}
-    '';
+    #preConfigure = ''
+    #  export PKG_CONFIG_PATH_FOR_BUILD="${glslang.dev}/lib/pkgconfig:$PKG_CONFIG_PATH_FOR_BUILD"
+    #  ${p.preConfigure}
+    #'';
   } // lib.optionalAttrs (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") {
     NIX_LDFLAGS = "--undefined-version";
   });
