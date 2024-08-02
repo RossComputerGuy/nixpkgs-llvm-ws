@@ -63,25 +63,62 @@
             }
           ];
         };
+        checks = flake-utils.lib.flattenTree (
+          lib.recurseIntoAttrs {
+            nixos-tests =
+              let
+                tests = import "${nixpkgs}/nixos/tests/all-tests.nix" {
+                  inherit system pkgs;
+                  callTest = config: config.test;
+                };
+              in
+              lib.recurseIntoAttrs {
+                boot = lib.recurseIntoAttrs {
+                  inherit
+                    (
+                      {
+                        biosUsb = { };
+                        biosCdrom = { };
+                      }
+                      // tests.boot
+                    )
+                    biosUsb
+                    biosCdrom
+                    uefiUsb
+                    uefiCdrom
+                    ;
+                };
+              };
+          }
+        );
       }
     ))
     // {
-      hydraJobs = {
-        bash = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.bash) self.legacyPackages;
-        coreutils = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.coreutils) self.legacyPackages;
-        pcre2 = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.pcre2) self.legacyPackages;
-        pkg-config = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.pkg-config) self.legacyPackages;
-        psutils = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.psutils) self.legacyPackages;
-        sqlite = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.sqlite) self.legacyPackages;
-        util-linux = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.util-linux) self.legacyPackages;
-        nixos-toplevel = lib.mapAttrs (
-          _: nixos: lib.hydraJob nixos.config.system.build.toplevel
-        ) self.nixosConfigurations;
-        nixos-vm = lib.mapAttrs (
-          _: nixos: lib.hydraJob nixos.config.system.build.vm
-        ) self.nixosConfigurations;
-        linux = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.linux) self.legacyPackages;
-        mesa = lib.mapAttrs (_: pkgs: lib.hydraJob pkgs.mesa) self.legacyPackages;
-      };
+      hydraJobs =
+        {
+          nixos-toplevel = lib.mapAttrs (
+            _: nixos: lib.hydraJob nixos.config.system.build.toplevel
+          ) self.nixosConfigurations;
+          nixos-vm = lib.mapAttrs (
+            _: nixos: lib.hydraJob nixos.config.system.build.vm
+          ) self.nixosConfigurations;
+        }
+        // (
+          let
+            genJobs =
+              attrs:
+              lib.listToAttrs (
+                lib.map (
+                  name:
+                  lib.nameValuePair name (
+                    lib.mapAttrs (_: drv: lib.hydraJob drv) (
+                      lib.filterAttrs (_: v: v != null) (lib.genAttrs systems (system: attrs.${system}.${name} or null))
+                    )
+                  )
+                ) (lib.flatten (lib.attrValues (lib.mapAttrs (_: set: lib.attrNames set) attrs)))
+              );
+          in
+          genJobs self.checks // genJobs self.packages
+        );
     };
 }
