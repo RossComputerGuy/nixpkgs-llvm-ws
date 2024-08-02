@@ -206,10 +206,6 @@ lib: final: prev: with final;
 
   # PR: https://github.com/NixOS/nixpkgs/pull/330112
   mesa = prev.mesa.overrideAttrs (f: p: {
-    #preConfigure = ''
-    #  export PKG_CONFIG_PATH_FOR_BUILD="${glslang.dev}/lib/pkgconfig:$PKG_CONFIG_PATH_FOR_BUILD"
-    #  ${p.preConfigure}
-    #'';
     buildInputs = lib.remove glslang p.buildInputs;
 
     depsBuildBuild = p.depsBuildBuild or []
@@ -242,12 +238,22 @@ lib: final: prev: with final;
     inherit (stdenv) cc;
   };
 
-  # PR: https://github.com/NixOS/nixpkgs/pull/330310
   pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
     (pythonFinal: pythonPrev: {
+      # PR: https://github.com/NixOS/nixpkgs/pull/330310
       mako = pythonPrev.mako.overrideAttrs (attrs: {
         disabledTests = attrs.disabledTests or []
           ++ lib.optional (stdenv.targetPlatform.useLLVM or false) "test_future_import";
+      });
+
+      # PR: https://github.com/NixOS/nixpkgs/pull/331869
+      jedi = pythonPrev.jedi.overrideAttrs (attrs: {
+        disabledTests = attrs.disabledTests or []
+          ++ lib.optionals (stdenv.targetPlatform.useLLVM or false) [
+            "test_create_environment_executable"
+            "test_dict_keys_completions"
+            "test_dict_completion"
+          ];
       });
     })
   ];
