@@ -147,15 +147,6 @@ lib: final: prev: with final;
     NIX_LDFLAGS = lib.optionalString (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") "--undefined-version";
   });
 
-  # PR: https://github.com/NixOS/nixpkgs/pull/330008
-  systemd = prev.systemd.overrideAttrs (f: p: {
-    buildInputs = p.buildInputs or [] ++ [
-      (llvmPackages.compiler-rt.override {
-        doFakeLibgcc = true;
-      })
-    ];
-  });
-
   # PR: https://github.com/NixOS/nixpkgs/pull/330014
   libunwind = prev.libunwind.overrideAttrs (f: p: {
     patches = p.patches or [] ++ [
