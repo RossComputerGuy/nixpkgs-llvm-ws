@@ -176,7 +176,7 @@ lib: final: prev: with final;
 
   # PR: https://github.com/NixOS/nixpkgs/pull/330065
   glslang = prev.glslang.overrideAttrs (f: p: {
-    outputs = [ "out" "dev" "lib" ];
+    outputs = [ "bin" "out" "dev" ];
 
     postInstall = ''
       mkdir -p $dev/include/External
@@ -191,15 +191,15 @@ lib: final: prev: with final;
         --replace-fail '=''${prefix}//' '=/' \
         --replace-fail "includedir=$dev/$dev" "includedir=$dev"
       # add a symlink for backwards compatibility
-      ln -s $out/bin/glslang $out/bin/glslangValidator
+      ln -s $bin/bin/glslang $bin/bin/glslangValidator
     '';
   });
 
   # PR: https://github.com/NixOS/nixpkgs/pull/330112
   mesa = prev.mesa.overrideAttrs (f: p: {
-    buildInputs = lib.remove glslang p.buildInputs;
-
-    depsBuildBuild = p.depsBuildBuild or []
+    nativeBuildInputs = (lib.remove glslang p.nativeBuildInputs)
+      ++ [ glslang.bin ];
+    buildInputs = (lib.remove glslang p.buildInputs)
       ++ [ spirv-tools ];
   } // lib.optionalAttrs (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") {
     NIX_LDFLAGS = "--undefined-version";
