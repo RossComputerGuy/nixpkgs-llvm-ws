@@ -201,8 +201,6 @@ lib: final: prev: with final;
       ++ [ glslang.bin ];
     buildInputs = (lib.remove glslang p.buildInputs)
       ++ [ spirv-tools ];
-  } // lib.optionalAttrs (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") {
-    NIX_LDFLAGS = "--undefined-version";
   });
 
   # PR: https://github.com/NixOS/nixpkgs/pull/330201

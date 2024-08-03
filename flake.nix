@@ -3,7 +3,6 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs";
-    nixos.url = "github:NixOS/nixpkgs?ref=pull/331873/head";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -16,7 +15,6 @@
     {
       self,
       nixpkgs,
-      nixos,
       flake-utils,
       ...
     }@inputs:
@@ -69,7 +67,7 @@
           lib.recurseIntoAttrs {
             nixos-tests =
               let
-                tests = import "${nixos}/nixos/tests/all-tests.nix" {
+                tests = import ./nixos/tests/all-tests.nix {
                   inherit system pkgs;
                   callTest = config: config.test;
                 };
