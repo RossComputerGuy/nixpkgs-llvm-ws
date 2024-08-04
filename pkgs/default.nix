@@ -287,4 +287,9 @@ lib: final: prev: with final;
     nativeBuildInputs = p.nativeBuildInputs or []
       ++ [ autoreconfHook ];
   });
+
+  # PR: https://github.com/NixOS/nixpkgs/pull/332147
+  alsa-firmware = prev.alsa-firmware.overrideAttrs (f: p: {
+    depsBuildBuild = [ stdenv.cc ];
+  });
 }
