@@ -51,7 +51,7 @@ let
         eager = p.wrong ++ optionals cfg.nixos.includeAllModules (extraModules ++ modules);
       };
 
-  manual = import ../../doc/manual rec {
+  manual = import "${pkgs.path}/nixos/doc/manual" rec {
     inherit pkgs config;
     version = config.system.nixos.release;
     revision = "release-${version}";

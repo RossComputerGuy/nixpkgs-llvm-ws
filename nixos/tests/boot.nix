@@ -42,7 +42,7 @@ let
 
   iso =
     (import ../lib/eval-config.nix {
-      inherit system;
+      inherit system pkgs;
       modules = [
         ../modules/installer/cd-dvd/installation-cd-minimal.nix
         ../modules/testing/test-instrumentation.nix
@@ -51,7 +51,7 @@ let
 
   sd =
     (import ../lib/eval-config.nix {
-      inherit system;
+      inherit system pkgs;
       modules = [
         ../modules/installer/sd-card/sd-image-x86_64.nix
         ../modules/testing/test-instrumentation.nix
@@ -84,7 +84,7 @@ let
   makeNetbootTest = name: extraConfig:
     let
       config = (import ../lib/eval-config.nix {
-          inherit system;
+          inherit system pkgs;
           modules =
             [ ../modules/installer/netboot/netboot.nix
               ../modules/testing/test-instrumentation.nix

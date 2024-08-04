@@ -29,7 +29,7 @@ evalConfigArgs@
 , # !!! See comment about check in lib/modules.nix
   check ? true
 , prefix ? []
-, lib ? import ../../lib
+, lib ? pkgs.lib
 , extraModules ? let e = builtins.getEnv "NIXOS_EXTRA_MODULE_PATH";
                  in lib.optional (e != "") (import e)
 }:
