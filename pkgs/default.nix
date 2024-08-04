@@ -208,33 +208,8 @@ lib: final: prev: with final;
     configureFlags = lib.optional (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") "LDFLAGS=-Wl,--undefined-version";
   });
 
-  # PR: https://github.com/NixOS/nixpkgs/pull/330239
-  libselinux = prev.libselinux.overrideAttrs (f: p: lib.optionalAttrs (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") {
-    NIX_LDFLAGS = "--undefined-version";
-  });
-
-  # PR: https://github.com/NixOS/nixpkgs/pull/330266
-  graphite2 = prev.graphite2.overrideAttrs (f: p: {
-    buildInputs = p.buildInputs or [] ++ [
-      (llvmPackages.compiler-rt.override {
-        doFakeLibgcc = true;
-      })
-    ];
-  });
-
-  # PR: https://github.com/NixOS/nixpkgs/pull/330305
-  makeBinaryWrapper = prev.makeBinaryWrapper.override {
-    inherit (stdenv) cc;
-  };
-
   pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
     (pythonFinal: pythonPrev: {
-      # PR: https://github.com/NixOS/nixpkgs/pull/330310
-      mako = pythonPrev.mako.overrideAttrs (attrs: {
-        disabledTests = attrs.disabledTests or []
-          ++ lib.optional (stdenv.targetPlatform.useLLVM or false) "test_future_import";
-      });
-
       # PR: https://github.com/NixOS/nixpkgs/pull/331869
       jedi = pythonPrev.jedi.overrideAttrs (attrs: {
         disabledTests = attrs.disabledTests or []
@@ -247,23 +222,12 @@ lib: final: prev: with final;
     })
   ];
 
-  # PR: https://github.com/NixOS/nixpkgs/pull/330316
-  libjack2 = prev.libjack2.overrideAttrs (f: p: {
-    buildInputs = p.buildInputs or []
-      ++ lib.optional (stdenv.targetPlatform.useLLVM or false)
-        (runCommand "llvm-libstdcxx" {} ''
-          mkdir -p $out/lib
-          ln -s ${llvmPackages.libcxx}/lib/libc++.so $out/lib/libstdc++.so
-          ln -s ${llvmPackages.libcxx}/lib/libc++.so.1 $out/lib/libstdc++.so.1
-          ln -s ${llvmPackages.libcxx}/lib/libc++.so.1.0 $out/lib/libstdc++.so.1.0
-        '');
-  });
-
   cyrus_sasl = prev.cyrus_sasl.overrideAttrs (f: p: {
     configureFlags = p.configureFlags or []
       ++ lib.optional stdenv.cc.isClang "CFLAGS=-Wno-implicit-function-declaration";
   });
 
+  # PR: https://github.com/NixOS/nixpkgs/pull/332167
   glibcLocales = (prev.glibcLocales.override {
     stdenv = gccStdenv;
   }).overrideAttrs (f: p: {
@@ -286,10 +250,5 @@ lib: final: prev: with final;
 
     nativeBuildInputs = p.nativeBuildInputs or []
       ++ [ autoreconfHook ];
-  });
-
-  # PR: https://github.com/NixOS/nixpkgs/pull/332147
-  alsa-firmware = prev.alsa-firmware.overrideAttrs (f: p: {
-    depsBuildBuild = [ stdenv.cc ];
   });
 }
