@@ -251,4 +251,8 @@ lib: final: prev: with final;
     nativeBuildInputs = p.nativeBuildInputs or []
       ++ [ autoreconfHook ];
   });
+
+  makeBinaryWrapper = prev.makeBinaryWrapper.override {
+    inherit (stdenv) cc;
+  };
 }
