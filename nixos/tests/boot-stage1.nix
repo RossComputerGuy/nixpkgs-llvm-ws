@@ -70,9 +70,13 @@ import ./make-test-python.nix ({ pkgs, ... }: {
     boot.initrd.kernelModules = [ "kcanary" ];
 
     boot.initrd.extraUtilsCommands = let
+      CC = if pkgs.stdenv.cc.isClang then "clang"
+        else if pkgs.stdenv.cc.isGNU then "gcc"
+        else throw "Unknown compiler for stdenv";
+
       compile = name: source: pkgs.runCommandCC name { inherit source; } ''
         mkdir -p "$out/bin"
-        echo "$source" | gcc -Wall -o "$out/bin/$name" -xc -
+        echo "$source" | ${CC} -Wall -o "$out/bin/$name" -xc -
       '';
 
       daemonize = name: source: compile name ''
