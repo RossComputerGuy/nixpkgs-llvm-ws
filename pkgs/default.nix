@@ -222,9 +222,13 @@ lib: final: prev: with final;
     })
   ];
 
+  # PR: https://github.com/NixOS/nixpkgs/pull/334780
   cyrus_sasl = prev.cyrus_sasl.overrideAttrs (f: p: {
     configureFlags = p.configureFlags or []
-      ++ lib.optional stdenv.cc.isClang "CFLAGS=-Wno-implicit-function-declaration";
+      ++ lib.optionals (stdenv.targetPlatform.useLLVM or false) [
+        "--disable-sample"
+        "CFLAGS=-DTIME_WITH_SYS_TIME"
+      ];
   });
 
   # PR: https://github.com/NixOS/nixpkgs/pull/332167
