@@ -41,7 +41,7 @@ runCommand "${rustc-unwrapped.pname}-wrapper-${rustc-unwrapped.version}" {
     description = "${rustc-unwrapped.meta.description} (wrapper script)";
     priority = 10;
   };
-} (''
+} ''
   mkdir -p $out/bin
   ln -s ${rustc-unwrapped}/bin/* $out/bin
   rm $out/bin/{rustc,rustdoc}
@@ -55,9 +55,3 @@ runCommand "${rustc-unwrapped.pname}-wrapper-${rustc-unwrapped.version}" {
   ${lib.concatMapStrings (output: "ln -s ${rustc-unwrapped.${output}} \$${output}\n")
     (lib.remove "out" rustc-unwrapped.outputs)}
 ''
-# Hack which is used upstream https://github.com/gentoo/gentoo/blob/master/dev-lang/rust/rust-1.78.0.ebuild#L284
-+ lib.optionalString (rustc-unwrapped.stdenv.targetPlatform.useLLVM or false) ''
-  mkdir -p $out/lib
-  ln -s ${rustc-unwrapped.llvmPackages.libunwind}/lib/libunwind.so $out/lib/libgcc_s.so
-  ln -s ${rustc-unwrapped.llvmPackages.libunwind}/lib/libunwind.so $out/lib/libgcc_s.so.1
-'')

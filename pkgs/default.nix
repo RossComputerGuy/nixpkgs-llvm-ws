@@ -3,19 +3,6 @@ lib: final: prev: with final;
   # PR: https://github.com/NixOS/nixpkgs/pull/330037
   wrapRustcWith = { rustc-unwrapped, ... } @ args: callPackage ./build-support/rust/rustc-wrapper args;
 
-  # PR: https://github.com/NixOS/nixpkgs/pull/320432
-  rust_1_79 = callPackage ./development/compilers/rust/1_79.nix {
-    inherit (darwin.apple_sdk.frameworks) CoreFoundation Security SystemConfiguration;
-    llvm_18 = llvmPackages_18.libllvm;
-  };
-
-  rust = rust_1_79;
-
-  rustPackages_1_79 = rust_1_79.packages.stable;
-  rustPackages = rustPackages_1_79;
-
-  inherit (rustPackages) cargo cargo-auditable cargo-auditable-cargo-wrapper clippy rustc rustPlatform;
-
   xorg = prev.xorg.overrideScope (f: p: {
     # PR: https://github.com/NixOS/nixpkgs/pull/329584
     libX11 = p.libX11.overrideAttrs (attrs: {
@@ -44,16 +31,6 @@ lib: final: prev: with final;
       configureFlags = attrs.configureFlags or []
         ++ lib.optional (stdenv.targetPlatform.useLLVM or false) "ac_cv_path_RAWCPP=cpp";
     });
-  });
-
-  # PR: https://github.com/NixOS/nixpkgs/pull/329817
-  busybox = prev.busybox.override {
-    stdenv = overrideCC stdenv buildPackages.llvmPackages.clangNoLibcxx;
-  };
-
-  # PR: https://github.com/NixOS/nixpkgs/pull/329827
-  libseccomp = prev.libseccomp.overrideAttrs (_: _: {
-    doCheck = !(stdenv.targetPlatform.useLLVM or false);
   });
 
   # PR: https://github.com/NixOS/nixpkgs/pull/329961
@@ -147,16 +124,6 @@ lib: final: prev: with final;
     NIX_LDFLAGS = lib.optionalString (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") "--undefined-version";
   });
 
-  # PR: https://github.com/NixOS/nixpkgs/pull/330014
-  libunwind = prev.libunwind.overrideAttrs (f: p: {
-    patches = p.patches or [] ++ [
-      (fetchpatch {
-        url = "https://github.com/libunwind/libunwind/pull/770/commits/a69d0f14c9e6c46e82ba6e02fcdedb2eb63b7f7f.patch";
-        hash = "sha256-9oBZimCXonNN++jJs3emp9w+q1aj3eNzvSKPgh92itA=";
-      })
-    ];
-  });
-
   # PR: https://github.com/NixOS/nixpkgs/pull/330048
   linuxPackages = prev.linuxPackages.extend (self: super: {
     kernel = super.kernel.overrideAttrs (f: p: {
@@ -201,11 +168,6 @@ lib: final: prev: with final;
       ++ [ glslang.bin ];
     buildInputs = (lib.remove glslang p.buildInputs)
       ++ [ spirv-tools ];
-  });
-
-  # PR: https://github.com/NixOS/nixpkgs/pull/330201
-  tremor = prev.tremor.overrideAttrs (f: p: {
-    configureFlags = lib.optional (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") "LDFLAGS=-Wl,--undefined-version";
   });
 
   pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
