@@ -78,12 +78,4 @@ lib: final: prev: with final;
   makeBinaryWrapper = prev.makeBinaryWrapper.override {
     inherit (stdenv) cc;
   };
-
-  systemd = prev.systemd.override {
-    stdenv = prev.stdenv.override {
-      cc = prev.stdenv.cc.override {
-        inherit (prev.gccStdenv.cc) bintools;
-      };
-    };
-  };
 }
