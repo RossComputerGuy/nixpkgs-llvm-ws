@@ -68,6 +68,13 @@ lib: final: prev: with final;
     });
   });
 
+  # PR: https://github.com/NixOS/nixpkgs/pull/348676
+  gettext = prev.gettext.overrideAttrs (f: p: {
+    postPatch = p.postPatch + lib.optionalString stdenv.cc.isClang ''
+      substituteInPlace gettext-runtime/intl/dcigettext.c --replace-fail "char *getcwd ();" ""
+    '';
+  });
+
   makeBinaryWrapper = prev.makeBinaryWrapper.override {
     inherit (stdenv) cc;
   };
