@@ -28,8 +28,20 @@
     (flake-utils.lib.eachSystem systems (
       system:
       let
-        pkgsHost = nixpkgs.legacyPackages.${system};
-        pkgs = pkgsHost.pkgsLLVM.appendOverlays [ (import ./pkgs/default.nix lib) ];
+        pkgs = import nixpkgs {
+          localSystem = {
+            config = system;
+          };
+          crossSystem = {
+            config = system;
+            useLLVM = true;
+            linker = "lld";
+          };
+          overlays = [
+            (import ./pkgs/default.nix lib)
+          ];
+        };
+        #pkgs = nixpkgs.legacyPackages.${system}.pkgsLLVM.appendOverlays [ (import ./pkgs/default.nix lib) ];
       in
       {
         legacyPackages = pkgs;
@@ -54,11 +66,8 @@
             ./nixos/default.nix
             {
               virtualisation = {
-                qemu = {
-                  package = pkgsHost.qemu;
-                  guestAgent.enable = false;
-                };
-                host.pkgs = pkgsHost;
+                qemu.guestAgent.enable = false;
+                host.pkgs = pkgs;
               };
             }
           ];
