@@ -3,7 +3,8 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs";
-    flake-utils.url = "github:numtide/flake-utils";
+    systems.url = "github:nix-systems/default";
+    flake-parts.url = "github:hercules-ci/flake-parts";
   };
 
   nixConfig = {
@@ -15,120 +16,62 @@
     {
       self,
       nixpkgs,
-      flake-utils,
+      systems,
+      flake-parts,
       ...
     }@inputs:
     let
       inherit (nixpkgs) lib;
-      systems = [
-        "aarch64-linux"
-        "x86_64-linux"
-      ];
     in
-    (flake-utils.lib.eachSystem systems (
-      system:
-      let
-        pkgs = import nixpkgs {
-          localSystem = {
-            config = system;
-          };
-          crossSystem = {
-            config = system;
-            useLLVM = true;
-            linker = "lld";
-          };
-          overlays = [
-            (import ./pkgs/default.nix lib)
-          ];
-        };
-        #pkgs = nixpkgs.legacyPackages.${system}.pkgsLLVM.appendOverlays [ (import ./pkgs/default.nix lib) ];
-      in
-      {
-        legacyPackages = pkgs;
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = import systems;
 
-        # Common packages we want to ensure work with LLVM
-        packages = {
-          inherit (pkgs)
-            linux
-            mesa
-            bash
-            stdenv
-            systemd
-            nix
-            ;
-        };
-      }
-      // lib.optionalAttrs pkgs.stdenv.isLinux {
-        nixosConfigurations = lib.nixosSystem {
-          inherit pkgs system;
-          modules = [
-            "${nixpkgs}/nixos/modules/virtualisation/qemu-vm.nix"
-            ./nixos/default.nix
-            {
-              virtualisation = {
-                qemu.guestAgent.enable = false;
-                host.pkgs = pkgs;
-              };
-            }
-          ];
-        };
-        checks = flake-utils.lib.flattenTree (
-          lib.recurseIntoAttrs {
-            nixos-tests =
-              let
-                tests = import ./nixos/tests/all-tests.nix {
-                  inherit system pkgs;
-                  callTest = config: config.test;
-                };
-              in
-              lib.recurseIntoAttrs {
-                boot = lib.recurseIntoAttrs {
-                  inherit
-                    (
-                      {
-                        biosUsb = { };
-                        biosCdrom = { };
-                      }
-                      // tests.boot
-                    )
-                    biosUsb
-                    biosCdrom
-                    uefiUsb
-                    uefiCdrom
-                    ;
-                };
-                inherit (tests) boot-stage1;
-              };
-          }
+      flake = {
+        overlays.default = import ./pkgs/default.nix lib;
+
+        nixosConfigurations = lib.filterAttrs (_: v: v != null) (
+          lib.genAttrs (import systems) (
+            system:
+            let
+              pkgs = inputs.self.legacyPackages.${system};
+            in
+            if pkgs.hostPlatform.isLinux then
+              inputs.nixpkgs.lib.nixosSystem {
+                inherit system pkgs;
+              }
+            else
+              null
+          )
         );
-      }
-    ))
-    // {
-      hydraJobs =
+      };
+
+      perSystem =
         {
-          nixos-toplevel = lib.mapAttrs (
-            _: nixos: lib.hydraJob nixos.config.system.build.toplevel
-          ) self.nixosConfigurations;
-          nixos-vm = lib.mapAttrs (
-            _: nixos: lib.hydraJob nixos.config.system.build.vm
-          ) self.nixosConfigurations;
-        }
-        // (
-          let
-            genJobs =
-              attrs:
-              lib.listToAttrs (
-                lib.map (
-                  name:
-                  lib.nameValuePair name (
-                    lib.mapAttrs (_: drv: lib.hydraJob drv) (
-                      lib.filterAttrs (_: v: v != null) (lib.genAttrs systems (system: attrs.${system}.${name} or null))
-                    )
-                  )
-                ) (lib.flatten (lib.attrValues (lib.mapAttrs (_: set: lib.attrNames set) attrs)))
-              );
-          in
-          genJobs self.checks // genJobs self.packages
-        );
+          config,
+          self',
+          inputs',
+          pkgs,
+          system,
+          ...
+        }:
+        {
+          legacyPackages = pkgs.pkgsLLVM;
+
+          packages =
+            {
+              inherit (pkgs.pkgsLLVM)
+                mesa
+                bash
+                stdenv
+                nix
+                ;
+            }
+            // lib.optionalAttrs pkgs.hostPlatform.isLinux {
+              inherit (pkgs.pkgsLLVM)
+                linux
+                systemd
+                ;
+            };
+        };
     };
 }
