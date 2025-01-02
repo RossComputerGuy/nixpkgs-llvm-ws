@@ -55,11 +55,19 @@
           ...
         }:
         {
-          legacyPackages = pkgs.pkgsLLVM;
+          _module.args.pkgs = (import inputs.nixpkgs {
+            inherit system;
+            overlays = [
+              inputs.self.overlays.default
+            ];
+            config = {};
+          }).pkgsLLVM;
+
+          legacyPackages = pkgs;
 
           packages =
             {
-              inherit (pkgs.pkgsLLVM)
+              inherit (pkgs)
                 mesa
                 bash
                 stdenv
@@ -67,7 +75,7 @@
                 ;
             }
             // lib.optionalAttrs pkgs.hostPlatform.isLinux {
-              inherit (pkgs.pkgsLLVM)
+              inherit (pkgs)
                 linux
                 systemd
                 ;
