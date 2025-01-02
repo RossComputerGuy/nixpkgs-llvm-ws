@@ -34,8 +34,15 @@ runCommand "${rustc-unwrapped.pname}-wrapper-${rustc-unwrapped.version}"
         with rustc-unwrapped.stdenv.targetPlatform; isMusl && !isStatic
       ) "-C target-feature=-crt-static";
 
-      ldflags = lib.optionalString (rustc-unwrapped.stdenv.targetPlatform.useLLVM or false
-      ) "-rpath ${rustc-unwrapped.llvmPackages.libunwind}/lib";
+      ldflags =
+        lib.optionalString (rustc-unwrapped.stdenv.targetPlatform.useLLVM or false)
+          "-rpath ${rustc-unwrapped.llvmPackages.libunwind}/lib -L ${
+            runCommand "libunwind-libgcc" { } ''
+              mkdir -p $out/lib
+              ln -s ${rustc-unwrapped.llvmPackages.libunwind}/lib/libunwind.so $out/lib/libgcc_s.so
+              ln -s ${rustc-unwrapped.llvmPackages.libunwind}/lib/libunwind.so $out/lib/libgcc_s.so.1
+            ''
+          }/lib";
     };
 
     passthru = {
