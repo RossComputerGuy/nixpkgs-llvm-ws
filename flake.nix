@@ -38,6 +38,17 @@
             if pkgs.hostPlatform.isLinux then
               inputs.nixpkgs.lib.nixosSystem {
                 inherit system pkgs;
+
+                modules = [
+                  "${nixpkgs}/nixos/modules/virtualisation/qemu-vm.nix"
+                  ./nixos/default.nix
+                  {
+                    virtualisation = {
+                      qemu.guestAgent.enable = false;
+                      host.pkgs = pkgs;
+                    };
+                  }
+                ];
               }
             else
               null
@@ -55,13 +66,14 @@
           ...
         }:
         {
-          _module.args.pkgs = (import inputs.nixpkgs {
-            inherit system;
-            overlays = [
-              inputs.self.overlays.default
-            ];
-            config = {};
-          }).pkgsLLVM;
+          _module.args.pkgs =
+            (import inputs.nixpkgs {
+              inherit system;
+              overlays = [
+                inputs.self.overlays.default
+              ];
+              config = { };
+            }).pkgsLLVM;
 
           legacyPackages = pkgs;
 
