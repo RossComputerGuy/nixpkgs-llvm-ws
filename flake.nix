@@ -84,6 +84,7 @@
                 bash
                 stdenv
                 nix
+                jemalloc
                 ;
             }
             // lib.optionalAttrs pkgs.hostPlatform.isLinux {
