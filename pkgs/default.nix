@@ -1,13 +1,5 @@
 lib: final: prev: with final;
 {
-  elfutils = prev.elfutils.overrideAttrs (f: p: {
-    patches = lib.filter (e: !(lib.hasSuffix "cxx-header-collision.patch" e)) p.patches
-      ++ lib.optional (stdenv.hostPlatform.useLLVM or false) (fetchurl {
-        url = "https://github.com/NixOS/nixpkgs/raw/d2717272348966a6ec8344f04780a80622ce9bda/pkgs/by-name/el/elfutils/cxx-header-collision.patch";
-        hash = "sha256-mldDyxjbhOsWfRZmeYKfCv5QlsmGuGYD7gJx30v9f0I=";
-      });
-  });
-
   # PR: https://github.com/NixOS/nixpkgs/pull/330037
   wrapRustcWith = { rustc-unwrapped, ... } @ args: callPackage ./build-support/rust/rustc-wrapper args;
 
