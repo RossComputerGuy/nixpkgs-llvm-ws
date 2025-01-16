@@ -68,6 +68,17 @@ lib: final: prev: with final;
     });
   });
 
+  alsa-lib = prev.alsa-lib.overrideAttrs (
+    f: p: {
+      patches = p.patches or [] ++ [
+        (fetchurl {
+          url = "https://github.com/alsa-project/alsa-lib/commit/76edab4e595bd5f3f4c636cccc8d7976d3c519d6.patch";
+          hash = "sha256-WCOXfe0/PPZRMXdNa29Jn28S2r0PQ7iTsabsxZVSwnk=";
+        })
+      ];
+    }
+  );
+
   makeBinaryWrapper = prev.makeBinaryWrapper.override {
     inherit (stdenv) cc;
   };
