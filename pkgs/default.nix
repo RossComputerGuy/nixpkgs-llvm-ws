@@ -106,4 +106,12 @@ lib: final: prev: with final;
   makeBinaryWrapper = prev.makeBinaryWrapper.override {
     inherit (stdenv) cc;
   };
+
+  cjson = prev.cjson.overrideAttrs (
+    _: _: {
+      cmakeFlags = [
+        "-DENABLE_CUSTOM_COMPILER_FLAGS=OFF"
+      ];
+    }
+  );
 }
