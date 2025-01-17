@@ -3,27 +3,7 @@ lib: final: prev: with final;
   # PR: https://github.com/NixOS/nixpkgs/pull/330037
   wrapRustcWith = { rustc-unwrapped, ... } @ args: callPackage ./build-support/rust/rustc-wrapper args;
 
-  cargo = prev.cargo.overrideAttrs (f: p: {
-    installCheckPhase = ''
-      runHook preInstallCheck
-      ${stdenv.cc.targetPrefix}readelf -a $out/bin/.cargo-wrapped | grep -F 'Shared library: [libcurl.so'
-      runHook postInstallCheck
-    '';
-  });
-
-  rustPlatform = prev.rustPlatform // {
-    buildRustPackage = prev.rustPlatform.buildRustPackage.override {
-      inherit cargo;
-    };
-  };
-
-  clippy = prev.clippy.override {
-    inherit rustPlatform;
-  };
-
-  switch-to-configuration-ng = (prev.switch-to-configuration-ng.override {
-    inherit rustPlatform clippy;
-  }).overrideAttrs (_: _: {
+  switch-to-configuration-ng = prev.switch-to-configuration-ng.overrideAttrs (_: _: {
     doCheck = !(stdenv.hostPlatform.useLLVM or false);
   });
 
