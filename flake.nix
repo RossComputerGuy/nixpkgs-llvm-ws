@@ -45,7 +45,7 @@
                   {
                     virtualisation = {
                       qemu.guestAgent.enable = false;
-                      host.pkgs = pkgs;
+                      host.pkgs = pkgs.pkgsBuildBuild;
                     };
                   }
                 ];
