@@ -128,4 +128,11 @@ lib: final: prev: with final;
   flashrom = prev.flashrom.overrideAttrs (f: p: {
     NIX_CFLAGS_COMPILE = "-Wno-gnu-folding-constant";
   });
+
+  rutabaga_gfx = prev.rutabaga_gfx.overrideAttrs (f: p: {
+    postPatch = lib.optionalString stdenv.hostPlatform.useLLVM ''
+      substituteInPlace rutabaga_gfx/build.rs \
+        --replace-fail "cargo:rustc-link-lib=dylib=stdc++" "cargo:rustc-link-lib=dylib=c++"
+    '';
+  });
 }
