@@ -5,6 +5,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs";
     systems.url = "github:nix-systems/default";
     flake-parts.url = "github:hercules-ci/flake-parts";
+    nixos-hardware.url = "github:NixOS/nixos-hardware";
   };
 
   nixConfig = {
@@ -18,6 +19,7 @@
       nixpkgs,
       systems,
       flake-parts,
+      nixos-hardware,
       ...
     }@inputs:
     let
@@ -29,31 +31,71 @@
       flake = {
         overlays.default = import ./pkgs/default.nix lib;
 
-        nixosConfigurations = lib.filterAttrs (_: v: v != null) (
-          lib.genAttrs (import systems) (
-            system:
-            let
-              pkgs = inputs.self.legacyPackages.${system};
-            in
-            if pkgs.hostPlatform.isLinux then
-              inputs.nixpkgs.lib.nixosSystem {
-                inherit system pkgs;
+        nixosConfigurations =
+          lib.filterAttrs (_: v: v != null) (
+            lib.genAttrs (import systems) (
+              system:
+              let
+                pkgs = inputs.self.legacyPackages.${system};
+              in
+              if pkgs.hostPlatform.isLinux then
+                inputs.nixpkgs.lib.nixosSystem {
+                  inherit system pkgs;
 
-                modules = [
-                  "${nixpkgs}/nixos/modules/virtualisation/qemu-vm.nix"
-                  ./nixos/default.nix
+                  modules = [
+                    "${nixpkgs}/nixos/modules/virtualisation/qemu-vm.nix"
+                    ./nixos/default.nix
+                    {
+                      virtualisation = {
+                        qemu.guestAgent.enable = false;
+                        host.pkgs = pkgs.pkgsBuildBuild;
+                      };
+                    }
+                  ];
+                }
+              else
+                null
+            )
+          )
+          // {
+            rpi4 = inputs.nixpkgs.lib.nixosSystem {
+              system = "aarch64-linux";
+              pkgs = inputs.self.legacyPackages.aarch64-linux;
+
+              modules = [
+                inputs.nixos-hardware.nixosModules.raspberry-pi-4
+                ./nixos/default.nix
+                (
+                  { pkgs, ... }:
                   {
-                    virtualisation = {
-                      qemu.guestAgent.enable = false;
-                      host.pkgs = pkgs.pkgsBuildBuild;
+                    hardware = {
+                      raspberry-pi."4".apply-overlays-dtmerge.enable = true;
+                      deviceTree = {
+                        enable = true;
+                        filter = "*rpi-4-*.dtb";
+                      };
+                    };
+
+                    environment.systemPackages = with pkgs; [
+                      libraspberrypi
+                      raspberrypi-eeprom
+                    ];
+
+                    fileSystems = {
+                      "/" = {
+                        device = "/dev/mmcblk0p2";
+                        fsType = "ext4";
+                      };
+                      "/boot" = {
+                        device = "/dev/mmcblk0p1";
+                        fsType = "vfat";
+                      };
                     };
                   }
-                ];
-              }
-            else
-              null
-          )
-        );
+                )
+              ];
+            };
+          };
       };
 
       perSystem =
