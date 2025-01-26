@@ -94,4 +94,34 @@ lib: final: prev: with final;
       ];
     }
   );
+
+  libtirpc = prev.libtirpc.overrideAttrs (_: _: {
+    NIX_LDFLAGS = lib.optionalString (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") "--undefined-version";
+  });
+
+  libaom = prev.libaom.overrideAttrs (f: p: {
+    cmakeFlags = p.cmakeFlags ++ lib.optional (stdenv.hostPlatform.useLLVM or false) "-DCMAKE_ASM_COMPILER=${lib.getBin stdenv.cc}/bin/${stdenv.cc.targetPrefix}cc";
+  });
+
+  pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+    (pythonFinal: pythonPrev: {
+      pyyaml = pythonPrev.pyyaml.overrideAttrs (attrs: {
+        doInstallCheck = attrs.doInstallCheck && !(stdenv.hostPlatform.useLLVM or false);
+      });
+
+      pybind11 = pythonPrev.pybind11.overrideAttrs (attrs: {
+        doInstallCheck = attrs.doInstallCheck && !(stdenv.hostPlatform.useLLVM or false);
+      });
+    })
+  ];
+
+  libjack2 = prev.libjack2.overrideAttrs (f: p: {
+    postPatch = p.postPatch + lib.optionalString (stdenv.hostPlatform.useLLVM or false) ''
+      sed -i 's/STDC++/C++/g' dbus/wscript
+    '';
+  });
+
+  xwayland = prev.xwayland.override {
+    withLibunwind = !(stdenv.hostPlatform.useLLVM or false);
+  };
 }
