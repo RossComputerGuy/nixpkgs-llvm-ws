@@ -135,4 +135,10 @@ lib: final: prev: with final;
         --replace-fail "cargo:rustc-link-lib=dylib=stdc++" "cargo:rustc-link-lib=dylib=c++"
     '';
   });
+
+  polkit = prev.polkit.overrideAttrs (f: p: {
+    env = p.env // {
+      NIX_CFLAGS_COMPILE = "-Wno-error=implicit-function-declaration";
+    };
+  });
 }
