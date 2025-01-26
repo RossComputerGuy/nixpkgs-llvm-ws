@@ -124,4 +124,8 @@ lib: final: prev: with final;
   xwayland = prev.xwayland.override {
     withLibunwind = !(stdenv.hostPlatform.useLLVM or false);
   };
+
+  flashrom = prev.flashrom.overrideAttrs (f: p: {
+    NIX_CFLAGS_COMPILE = "-Wno-gnu-folding-constant";
+  });
 }

@@ -18,5 +18,15 @@
     };
 
     documentation.enable = false;
+
+    boot.kernelPatches = lib.mkIf pkgs.stdenv.hostPlatform.isAarch64 [
+      {
+        name = "aarch64-vdso";
+        patch = null;
+        extraStructuredConfig = with lib.kernel; {
+          COMPAT = no;
+        };
+      }
+    ];
   };
 }

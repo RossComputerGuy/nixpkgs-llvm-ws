@@ -66,7 +66,7 @@
                 inputs.nixos-hardware.nixosModules.raspberry-pi-4
                 ./nixos/default.nix
                 (
-                  { pkgs, ... }:
+                  { pkgs, lib, ... }:
                   {
                     hardware = {
                       raspberry-pi."4".apply-overlays-dtmerge.enable = true;
