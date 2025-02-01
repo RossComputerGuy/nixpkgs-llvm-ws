@@ -24,6 +24,8 @@
       btop
     ];
 
+    programs.labwc.enable = true;
+
     security = {
       polkit.enable = true;
       sudo = {

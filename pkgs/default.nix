@@ -189,13 +189,9 @@ in
     ];
   });
 
-  gperftools = prev.gperftools.overrideAttrs (f: p: {
-    buildInputs =
-      [ perl ]
-      ++ lib.optional (
-        stdenv.hostPlatform.isLinux && !(stdenv.hostPlatform.isAarch || stdenv.hostPlatform.isStatic) && !stdenv.hostPlatform.useLLVM
-      ) libunwind;
-  });
+  gperftools = prev.gperftools.override {
+    stdenv = gccStdenv;
+  };
 
   ffmpeg = (prev.ffmpeg.override {
     # Disable due to gfortran not building
