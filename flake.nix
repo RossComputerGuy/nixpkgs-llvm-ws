@@ -75,12 +75,15 @@
                         enable = true;
                         filter = "*rpi-4-*.dtb";
                       };
+                      enableAllHardware = lib.mkForce false;
                     };
 
                     environment.systemPackages = with pkgs; [
                       libraspberrypi
                       raspberrypi-eeprom
                     ];
+
+                    boot.supportedFilesystems = lib.mkForce [ "btrfs" "f2fs" "ntfs" "vfat" "xfs" ];
                   }
                 )
               ];
