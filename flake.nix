@@ -70,7 +70,10 @@
                   { pkgs, lib, ... }:
                   {
                     hardware = {
-                      raspberry-pi."4".apply-overlays-dtmerge.enable = true;
+                      raspberry-pi."4" = {
+                        apply-overlays-dtmerge.enable = true;
+                        pwm0.enable = true;
+                      };
                       deviceTree = {
                         enable = true;
                         filter = "*rpi-4-*.dtb";
@@ -83,7 +86,12 @@
                       raspberrypi-eeprom
                     ];
 
-                    boot.supportedFilesystems = lib.mkForce [ "btrfs" "f2fs" "ntfs" "vfat" "xfs" ];
+                    services.openssh.enable = true;
+
+                    boot = {
+                      supportedFilesystems = lib.mkForce [ "btrfs" "f2fs" "ntfs" "vfat" "xfs" ];
+                      kernelParams = [ "console=serial0,115200" ];
+                    };
                   }
                 )
               ];

@@ -8,6 +8,7 @@
       isNormalUser = true;
       description = "NixOS";
       initialPassword = "nixos";
+      extraGroups = [ "wheel" "networkmanager" "video" ];
     };
 
     programs.command-not-found.enable = false;
@@ -18,6 +19,18 @@
     };
 
     documentation.enable = false;
+
+    environment.systemPackages = with pkgs; [
+      btop
+    ];
+
+    security = {
+      polkit.enable = true;
+      sudo = {
+        enable = true;
+        wheelNeedsPassword = false;
+      };
+    };
 
     boot.kernelPatches = lib.mkIf pkgs.stdenv.hostPlatform.isAarch64 [
       {

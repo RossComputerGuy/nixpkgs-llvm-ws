@@ -81,17 +81,6 @@ in
     });
   });
 
-  alsa-lib = prev.alsa-lib.overrideAttrs (
-    f: p: {
-      patches = p.patches or [] ++ [
-        (fetchurl {
-          url = "https://github.com/alsa-project/alsa-lib/commit/76edab4e595bd5f3f4c636cccc8d7976d3c519d6.patch";
-          hash = "sha256-WCOXfe0/PPZRMXdNa29Jn28S2r0PQ7iTsabsxZVSwnk=";
-        })
-      ];
-    }
-  );
-
   makeBinaryWrapper = prev.makeBinaryWrapper.override {
     inherit (stdenv) cc;
   };
@@ -198,5 +187,40 @@ in
         inherit (buildPackages.binutils) libc;
       })
     ];
+  });
+
+  gperftools = prev.gperftools.overrideAttrs (f: p: {
+    buildInputs =
+      [ perl ]
+      ++ lib.optional (
+        stdenv.hostPlatform.isLinux && !(stdenv.hostPlatform.isAarch || stdenv.hostPlatform.isStatic) && !stdenv.hostPlatform.useLLVM
+      ) libunwind;
+  });
+
+  ffmpeg = (prev.ffmpeg.override {
+    # Disable due to gfortran not building
+    withSdl2 = false;
+    withSpeex = false;
+    withPulse = false;
+    withOpenmpt = false;
+  }).overrideAttrs (f: p: {
+    configureFlags = p.configureFlags
+      ++ lib.optionals (stdenv.cc.isClang) [
+        "--cc=${stdenv.cc.targetPrefix}clang"
+        "--cxx=${stdenv.cc.targetPrefix}clang++"
+      ];
+
+    doCheck = p.doCheck && !stdenv.hostPlatform.useLLVM;
+  });
+
+  libgudev = prev.libgudev.overrideAttrs (f: p: {
+    # umockdev fails to build
+    doCheck = !stdenv.hostPlatform.useLLVM;
+
+    # Same as https://gitlab.gnome.org/GNOME/libgudev/-/merge_requests/30 but MR has conflict.
+    postPatch = lib.optionalString stdenv.hostPlatform.useLLVM ''
+      substituteInPlace gudev/meson.build \
+        --replace-fail "-export-dynamic" "-Wl,--export-dynamic"
+    '';
   });
 }
