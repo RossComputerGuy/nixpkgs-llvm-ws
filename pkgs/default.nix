@@ -112,6 +112,17 @@ lib: final: prev: with final;
       pybind11 = pythonPrev.pybind11.overrideAttrs (attrs: {
         doInstallCheck = attrs.doInstallCheck && !(stdenv.hostPlatform.useLLVM or false);
       });
+
+      pycparser = pythonPrev.pycparser.overrideAttrs (attrs: {
+        preCheck = ''
+          substituteInPlace examples/using_gcc_E_libc.py \
+            --replace-fail "'gcc'" "'${stdenv.cc.targetPrefix}cc'"
+        '';
+      });
+
+      cffi = pythonPrev.cffi.overrideAttrs (attrs: {
+        doInstallCheck = !(stdenv.hostPlatform.isMusl || stdenv.hostPlatform.useLLVM or false);
+      });
     })
   ];
 
@@ -148,5 +159,17 @@ lib: final: prev: with final;
 
   tcp_wrappers = prev.tcp_wrappers.overrideAttrs (f: p: {
     patches = p.patches ++ lib.optional (stdenv.cc.isClang) ./by-name/tc/tcp_wrappers/clang.diff;
+  });
+
+  tdb = prev.tdb.overrideAttrs (f: p: {
+    NIX_LDFLAGS = lib.optionalString (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") "--undefined-version";
+  });
+
+  talloc = prev.talloc.overrideAttrs (f: p: {
+    NIX_LDFLAGS = lib.optionalString (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") "--undefined-version";
+  });
+
+  screen = prev.screen.overrideAttrs (f: p: {
+    doCheck = !stdenv.hostPlatform.useLLVM;
   });
 }
