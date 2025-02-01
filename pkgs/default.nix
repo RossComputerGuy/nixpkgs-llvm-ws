@@ -1,4 +1,13 @@
 lib: final: prev: with final;
+let
+  ubootPkgs = callPackage "${final.path}/pkgs/misc/uboot/default.nix" {
+    stdenv = gccStdenv.override {
+      cc = gccStdenv.cc.override {
+        bintools = binutils;
+      };
+    };
+  };
+in
 {
   # PR: https://github.com/NixOS/nixpkgs/pull/330037
   wrapRustcWith = { rustc-unwrapped, ... } @ args: callPackage ./build-support/rust/rustc-wrapper args;
@@ -171,5 +180,23 @@ lib: final: prev: with final;
 
   screen = prev.screen.overrideAttrs (f: p: {
     doCheck = !stdenv.hostPlatform.useLLVM;
+  });
+
+  ubootRaspberryPi3_64bit = ubootPkgs.ubootRaspberryPi3_64bit.overrideAttrs (f: p: {
+    depsBuildBuild = [
+      (buildPackages.gccStdenv.cc.override {
+        bintools = buildPackages.binutils;
+        inherit (buildPackages.binutils) libc;
+      })
+    ];
+  });
+
+  ubootRaspberryPi4_64bit = ubootPkgs.ubootRaspberryPi4_64bit.overrideAttrs (f: p: {
+    depsBuildBuild = [
+      (buildPackages.gccStdenv.cc.override {
+        bintools = buildPackages.binutils;
+        inherit (buildPackages.binutils) libc;
+      })
+    ];
   });
 }
