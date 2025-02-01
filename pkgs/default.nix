@@ -141,4 +141,12 @@ lib: final: prev: with final;
       NIX_CFLAGS_COMPILE = "-Wno-error=implicit-function-declaration";
     };
   });
+
+  keyutils = prev.keyutils.overrideAttrs (f: p: {
+    NIX_LDFLAGS = lib.optionalString (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") "--undefined-version";
+  });
+
+  tcp_wrappers = prev.tcp_wrappers.overrideAttrs (f: p: {
+    patches = p.patches ++ lib.optional (stdenv.cc.isClang) ./by-name/tc/tcp_wrappers/clang.diff;
+  });
 }

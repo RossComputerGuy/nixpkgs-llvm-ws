@@ -1,0 +1,23 @@
+--- a/hosts_access.c	2025-01-31 16:16:05.910662712 -0800
++++ b/hosts_access.c	2025-01-31 16:19:04.583175814 -0800
+@@ -44,9 +44,6 @@
+ #include <netdb.h>
+ #endif
+ 
+-extern char *fgets();
+-extern int errno;
+-
+ #ifndef	INADDR_NONE
+ #define	INADDR_NONE	(-1)		/* XXX should be 0xffffffff */
+ #endif
+--- a/misc.c	2025-01-31 16:16:05.910662712 -0800
++++ b/misc.c	2025-01-31 16:22:05.385608781 -0800
+@@ -18,8 +18,6 @@
+ 
+ #include "tcpd.h"
+ 
+-extern char *fgets();
+-
+ #ifndef	INADDR_NONE
+ #define	INADDR_NONE	(-1)		/* XXX should be 0xffffffff */
+ #endif
