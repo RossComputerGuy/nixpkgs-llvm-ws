@@ -73,6 +73,7 @@
                       raspberry-pi."4" = {
                         apply-overlays-dtmerge.enable = true;
                         pwm0.enable = true;
+                        fkms-3d.enable = true;
                       };
                       deviceTree = {
                         enable = true;
