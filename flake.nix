@@ -75,10 +75,7 @@
                         pwm0.enable = true;
                         fkms-3d.enable = true;
                       };
-                      deviceTree = {
-                        enable = true;
-                        filter = "*rpi-4-*.dtb";
-                      };
+                      deviceTree.enable = true;
                       enableAllHardware = lib.mkForce false;
                     };
 

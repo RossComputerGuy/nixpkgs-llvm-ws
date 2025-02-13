@@ -14,7 +14,7 @@
     programs.command-not-found.enable = false;
 
     system = {
-      stateVersion = lib.version;
+      stateVersion = lib.versions.majorMinor lib.version;
       disableInstallerTools = true;
     };
 
