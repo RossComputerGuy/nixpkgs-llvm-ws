@@ -13,6 +13,11 @@
 
     programs.command-not-found.enable = false;
 
+    services = {
+      speechd.enable = false;
+      pipewire.enable = false;
+    };
+
     system = {
       stateVersion = lib.versions.majorMinor lib.version;
       disableInstallerTools = true;
@@ -25,6 +30,11 @@
     ];
 
     programs.labwc.enable = true;
+
+    xdg.portal = {
+      enable = lib.mkForce false;
+      wlr.enable = lib.mkForce false;
+    };
 
     security = {
       polkit.enable = true;

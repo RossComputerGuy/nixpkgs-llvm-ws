@@ -81,22 +81,6 @@ in
     });
   });
 
-  makeBinaryWrapper = prev.makeBinaryWrapper.override {
-    inherit (stdenv) cc;
-  };
-
-  cjson = prev.cjson.overrideAttrs (
-    _: _: {
-      cmakeFlags = [
-        "-DENABLE_CUSTOM_COMPILER_FLAGS=OFF"
-      ];
-    }
-  );
-
-  libtirpc = prev.libtirpc.overrideAttrs (_: _: {
-    NIX_LDFLAGS = lib.optionalString (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") "--undefined-version";
-  });
-
   libaom = prev.libaom.overrideAttrs (f: p: {
     cmakeFlags = p.cmakeFlags ++ lib.optional (stdenv.hostPlatform.useLLVM or false) "-DCMAKE_ASM_COMPILER=${lib.getBin stdenv.cc}/bin/${stdenv.cc.targetPrefix}cc";
   });
@@ -117,10 +101,6 @@ in
             --replace-fail "'gcc'" "'${stdenv.cc.targetPrefix}cc'"
         '';
       });
-
-      cffi = pythonPrev.cffi.overrideAttrs (attrs: {
-        doInstallCheck = !(stdenv.hostPlatform.isMusl || stdenv.hostPlatform.useLLVM or false);
-      });
     })
   ];
 
@@ -136,19 +116,6 @@ in
 
   flashrom = prev.flashrom.overrideAttrs (f: p: {
     NIX_CFLAGS_COMPILE = "-Wno-gnu-folding-constant";
-  });
-
-  rutabaga_gfx = prev.rutabaga_gfx.overrideAttrs (f: p: {
-    postPatch = lib.optionalString stdenv.hostPlatform.useLLVM ''
-      substituteInPlace rutabaga_gfx/build.rs \
-        --replace-fail "cargo:rustc-link-lib=dylib=stdc++" "cargo:rustc-link-lib=dylib=c++"
-    '';
-  });
-
-  polkit = prev.polkit.overrideAttrs (f: p: {
-    env = p.env // {
-      NIX_CFLAGS_COMPILE = "-Wno-error=implicit-function-declaration";
-    };
   });
 
   keyutils = prev.keyutils.overrideAttrs (f: p: {
