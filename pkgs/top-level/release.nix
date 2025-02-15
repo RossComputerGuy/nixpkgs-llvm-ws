@@ -5,7 +5,7 @@ in
 args:
 import "${nixpkgs}/pkgs/top-level/release.nix" ({
   system = builtins.currentSystem;
-} // args // {
+} // (lib.removeAttrs args [ "nixpkgs-llvm-ws" ]) // {
   nixpkgsArgs = (args.nixpkgsArgs or {}) // {
     crossSystem = {
       useLLVM = true;
