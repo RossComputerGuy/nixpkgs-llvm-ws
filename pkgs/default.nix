@@ -73,7 +73,7 @@ in
                        stdenv.targetPlatform.isx86_64)
           (fetchurl {
             url = "https://lore.kernel.org/all/20240208012057.2754421-2-yshuiv7@gmail.com/t.mbox.gz";
-            hash = "sha256-DVC9hZ5n+vyS0jroygN2tCAHPPiL+oGbezxdm2yM6s8=";
+            hash = "sha256-yparoV/1aGf8U7xzou48s6y6mZKbj0YFhn6QOrPOHFg=";
           });
 
       hardeningDisable = p.hardeningDisable or []
