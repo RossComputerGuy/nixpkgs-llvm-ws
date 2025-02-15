@@ -186,4 +186,10 @@ in
         --replace-fail "-export-dynamic" "-Wl,--export-dynamic"
     '';
   });
+
+  bind = prev.bind.override {
+    jemalloc = null;
+  };
+
+  xdg-utils = runCommand prev.xdg-utils.name {} "mkdir -p $out";
 }

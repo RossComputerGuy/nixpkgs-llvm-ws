@@ -32,7 +32,6 @@ in
       '';
       systemPackages = with pkgs; [
         nixos-icons # needed for gnome and pantheon about dialog, nixos-manual and maybe more
-        xdg-utils
       ];
     };
 
