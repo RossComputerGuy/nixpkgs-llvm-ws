@@ -31,13 +31,13 @@
       flake = {
         hydraJobs =
           lib.recursiveUpdate
-            (lib.genAttrs (import systems) (system: {
-              nixos-vm = self.nixosConfigurations.${system};
+            (lib.genAttrs (import systems) (system: lib.optionalAttrs (system ? self.nixosConfigurations) {
+              nixos-vm = self.nixosConfigurations.${system}.config.system.build.toplevel;
             }))
             (
               lib.recursiveUpdate {
                 aarch64-linux = {
-                  inherit (self.nixosConfigurations) rpi4;
+                  rpi4 = self.nixosConfigurations.rpi4.config.system.build.sdImage;
                 };
               } self.packages
             );
