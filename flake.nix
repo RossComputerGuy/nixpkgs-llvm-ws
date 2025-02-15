@@ -31,7 +31,7 @@
       flake = {
         hydraJobs =
           lib.recursiveUpdate
-            (lib.genAttrs (import system) (system: {
+            (lib.genAttrs (import systems) (system: {
               nixos-vm = self.nixosConfigurations.${system};
             }))
             (
