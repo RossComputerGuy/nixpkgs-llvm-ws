@@ -29,7 +29,18 @@
       systems = import systems;
 
       flake = {
-        hydraJobs = self.packages;
+        hydraJobs =
+          lib.recursiveUpdate
+            (lib.genAttrs (import system) (system: {
+              nixos-vm = self.nixosConfigurations.${system};
+            }))
+            (
+              lib.recursiveUpdate {
+                aarch64-linux = {
+                  inherit (self.nixosConfigurations) rpi4;
+                };
+              } self.packages
+            );
 
         overlays.default = import ./pkgs/default.nix lib;
 
@@ -89,7 +100,13 @@
                     services.openssh.enable = true;
 
                     boot = {
-                      supportedFilesystems = lib.mkForce [ "btrfs" "f2fs" "ntfs" "vfat" "xfs" ];
+                      supportedFilesystems = lib.mkForce [
+                        "btrfs"
+                        "f2fs"
+                        "ntfs"
+                        "vfat"
+                        "xfs"
+                      ];
                       kernelParams = [ "console=serial0,115200" ];
                     };
                   }
