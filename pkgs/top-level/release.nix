@@ -9,8 +9,11 @@ import "${nixpkgs}/pkgs/top-level/release.nix" ({
   nixpkgsArgs = (args.nixpkgsArgs or {}) // {
     crossSystem = {
       useLLVM = true;
-      linker = "ldd";
+      linker = "lld";
       system = args.system or builtins.currentSystem;
     };
+    overlays = [
+      (import ../default.nix lib)
+    ];
   };
 })
