@@ -29,6 +29,8 @@
       systems = import systems;
 
       flake = {
+        hydraJobs = self.packages;
+
         overlays.default = import ./pkgs/default.nix lib;
 
         nixosConfigurations =
