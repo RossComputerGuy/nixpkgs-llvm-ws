@@ -31,16 +31,12 @@
       flake = {
         hydraJobs =
           lib.recursiveUpdate
-            (lib.genAttrs (import systems) (system: lib.optionalAttrs (system ? self.nixosConfigurations) {
-              nixos-vm = self.nixosConfigurations.${system}.config.system.build.toplevel;
-            }))
-            (
-              lib.recursiveUpdate {
-                aarch64-linux = {
-                  rpi4 = self.nixosConfigurations.rpi4.config.system.build.sdImage;
-                };
-              } self.packages
-            );
+            self.packages
+            {
+              aarch64-linux = {
+                rpi4 = self.nixosConfigurations.rpi4.config.system.build.sdImage;
+              };
+            };
 
         overlays.default = import ./pkgs/default.nix lib;
 
@@ -152,6 +148,8 @@
                 linux
                 systemd
                 ;
+
+              nixos-vm = self.nixosConfigurations.${system}.config.system.build.toplevel;
             };
         };
     };
