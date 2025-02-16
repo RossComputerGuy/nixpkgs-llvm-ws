@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs";
-    systems.url = "github:nix-systems/default";
+    systems.url = "github:nix-systems/default-linux";
     flake-parts.url = "github:hercules-ci/flake-parts";
     nixos-hardware.url = "github:NixOS/nixos-hardware";
   };
@@ -141,6 +141,7 @@
                 stdenv
                 nix
                 jemalloc
+                firefox
                 ;
             }
             // lib.optionalAttrs pkgs.hostPlatform.isLinux {

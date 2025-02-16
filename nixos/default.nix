@@ -29,7 +29,10 @@
       btop
     ];
 
-    programs.labwc.enable = true;
+    programs = {
+      labwc.enable = true;
+      firefox.enable = true;
+    };
 
     xdg.portal = {
       enable = lib.mkForce false;
