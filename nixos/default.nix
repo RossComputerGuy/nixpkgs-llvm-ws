@@ -31,12 +31,12 @@
 
     programs = {
       labwc.enable = true;
-      firefox.enable = true;
-    };
-
-    xdg.portal = {
-      enable = lib.mkForce false;
-      wlr.enable = lib.mkForce false;
+      firefox = {
+        enable = true;
+        package = pkgs.wrapFirefox (pkgs.firefox-unwrapped.override {
+          jemallocSupport = !pkgs.stdenv.hostPlatform.isAarch64;
+        }) {};
+      };
     };
 
     security = {

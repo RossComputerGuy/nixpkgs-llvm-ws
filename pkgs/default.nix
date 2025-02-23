@@ -18,7 +18,7 @@ in
 
   # PR: https://github.com/NixOS/nixpkgs/pull/329979
   nix = prev.nix.overrideAttrs (_: _: {
-    doInstallCheck = !(stdenv.targetPlatform.useLLVM or false);
+    doInstallCheck = !(stdenv.hostPlatform.useLLVM or false);
   });
 
   # PR: https://github.com/NixOS/nixpkgs/pull/329995
@@ -77,7 +77,7 @@ in
           });
 
       hardeningDisable = p.hardeningDisable or []
-        ++ lib.optional (stdenv.cc.isClang && stdenv.targetPlatform.parsed.cpu.family == "arm") "zerocallusedregs";
+        ++ lib.optional (stdenv.cc.isClang && stdenv.hostPlatform.parsed.cpu.family == "arm") "zerocallusedregs";
     });
   });
 
@@ -101,6 +101,13 @@ in
             --replace-fail "'gcc'" "'${stdenv.cc.targetPrefix}cc'"
         '';
       });
+
+      # PR: https://github.com/NixOS/nixpkgs/pull/384147
+      eventlet = pythonPrev.eventlet.overrideAttrs (attrs: {
+        disabledTests = attrs.disabledTests ++ [
+          "test_send_timeout"
+        ];
+      });
     })
   ];
 
@@ -114,10 +121,6 @@ in
     withLibunwind = !(stdenv.hostPlatform.useLLVM or false);
   };
 
-  flashrom = prev.flashrom.overrideAttrs (f: p: {
-    NIX_CFLAGS_COMPILE = "-Wno-gnu-folding-constant";
-  });
-
   keyutils = prev.keyutils.overrideAttrs (f: p: {
     NIX_LDFLAGS = lib.optionalString (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") "--undefined-version";
   });
@@ -126,17 +129,17 @@ in
     patches = p.patches ++ lib.optional (stdenv.cc.isClang) ./by-name/tc/tcp_wrappers/clang.diff;
   });
 
-  tdb = prev.tdb.overrideAttrs (f: p: {
+  tdb = prev.tdb.overrideAttrs {
     NIX_LDFLAGS = lib.optionalString (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") "--undefined-version";
-  });
+  };
 
-  talloc = prev.talloc.overrideAttrs (f: p: {
+  talloc = prev.talloc.overrideAttrs {
     NIX_LDFLAGS = lib.optionalString (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") "--undefined-version";
-  });
+  };
 
-  screen = prev.screen.overrideAttrs (f: p: {
+  screen = prev.screen.overrideAttrs {
     doCheck = !stdenv.hostPlatform.useLLVM;
-  });
+  };
 
   ubootRaspberryPi3_64bit = ubootPkgs.ubootRaspberryPi3_64bit.overrideAttrs (f: p: {
     depsBuildBuild = [
@@ -160,13 +163,7 @@ in
     stdenv = gccStdenv;
   };
 
-  ffmpeg = (prev.ffmpeg.override {
-    # Disable due to gfortran not building
-    withSdl2 = false;
-    withSpeex = false;
-    withPulse = false;
-    withOpenmpt = false;
-  }).overrideAttrs (f: p: {
+  ffmpeg = prev.ffmpeg.overrideAttrs (f: p: {
     configureFlags = p.configureFlags
       ++ lib.optionals (stdenv.cc.isClang) [
         "--cc=${stdenv.cc.targetPrefix}clang"
@@ -191,5 +188,55 @@ in
     jemalloc = null;
   };
 
-  xdg-utils = runCommand prev.xdg-utils.name {} "mkdir -p $out";
+  cryptsetup = prev.cryptsetup.overrideAttrs {
+    doCheck = false;
+  };
+
+  soundtouch = prev.soundtouch.overrideAttrs (f: p: {
+    patches = p.patches or []
+      ++ lib.optional (stdenv.hostPlatform.useLLVM) ./soundtouch.patch;
+  });
+
+  libpulseaudio = prev.libpulseaudio.overrideAttrs (f: p: {
+    NIX_LDFLAGS = lib.optionalString (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") "--undefined-version";
+  });
+
+  roc-toolkit = prev.roc-toolkit.override {
+    libunwindSupport = !stdenv.hostPlatform.useLLVM;
+  };
+
+  directfb = prev.directfb.override {
+    # TODO: do better
+    stdenv = gccStdenv;
+  };
+
+  libdc1394 = prev.libdc1394.override {
+    # TODO: do better
+    stdenv = gccStdenv;
+  };
+
+  flite = prev.flite.override {
+    stdenv = gccStdenv;
+  };
+
+  libopenmpt = prev.libopenmpt.overrideAttrs {
+    doCheck = !stdenv.hostPlatform.useLLVM;
+  };
+
+  tinysparql = prev.tinysparql.overrideAttrs {
+    doCheck = !stdenv.hostPlatform.useLLVM;
+  };
+
+  librsvg = prev.librsvg.overrideAttrs {
+    doCheck = !stdenv.hostPlatform.useLLVM;
+  };
+
+  slang = prev.slang.overrideAttrs (f: p: {
+    NIX_LDFLAGS = lib.optionalString (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") "--undefined-version";
+  });
+
+  util-linux = prev.util-linux.overrideAttrs (f: p: {
+    configureFlags = p.configureFlags
+      ++ lib.optional (stdenv.hostPlatform.useLLVM) "LDFLAGS=-Wl,--undefined-version";
+  });
 }
