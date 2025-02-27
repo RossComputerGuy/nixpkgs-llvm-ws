@@ -304,7 +304,12 @@ in
     runCommand prev.xdg-utils.name {} "mkdir -p $out"
   else prev.xdg-utils;
 
-  firefox = wrapFirefox (firefox-unwrapped.override {
-    jemallocSupport = false;
+  jemalloc = prev.jemalloc.overrideAttrs (f: p: {
+    # Skip because 64k page size borked
+    doCheck = p.doCheck && !stdenv.hostPlatform.useLLVM;
   });
+
+  libunwind = if stdenv.hostPlatform.useLLVM then
+    llvmPackages.libunwind
+  else prev.libunwind;
 }
