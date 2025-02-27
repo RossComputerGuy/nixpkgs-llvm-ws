@@ -33,10 +33,14 @@
       labwc.enable = true;
       firefox = {
         enable = true;
-        package = pkgs.wrapFirefox (pkgs.firefox-unwrapped.override {
-          jemallocSupport = !pkgs.stdenv.hostPlatform.isAarch64;
-        }) {};
+        package = pkgs.pkgsBuildBuild.firefox;
       };
+    };
+
+    xdg.portal = {
+      enable = lib.mkForce false;
+      wlr.enable = lib.mkForce false;
+      extraPortals = lib.mkForce [];
     };
 
     security = {

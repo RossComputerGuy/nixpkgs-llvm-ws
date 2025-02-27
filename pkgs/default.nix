@@ -163,7 +163,22 @@ in
     stdenv = gccStdenv;
   };
 
-  ffmpeg = prev.ffmpeg.overrideAttrs (f: p: {
+  ffmpeg = (prev.ffmpeg.override {
+    withOpenmpt = false;
+    withSdl2 = false;
+  }).overrideAttrs (f: p: {
+    configureFlags = p.configureFlags
+      ++ lib.optionals (stdenv.cc.isClang) [
+        "--cc=${stdenv.cc.targetPrefix}clang"
+        "--cxx=${stdenv.cc.targetPrefix}clang++"
+      ];
+
+    doCheck = p.doCheck && !stdenv.hostPlatform.useLLVM;
+  });
+
+  ffmpeg-headless = (prev.ffmpeg-headless.override {
+    withOpenmpt = false;
+  }).overrideAttrs (f: p: {
     configureFlags = p.configureFlags
       ++ lib.optionals (stdenv.cc.isClang) [
         "--cc=${stdenv.cc.targetPrefix}clang"
@@ -183,6 +198,12 @@ in
         --replace-fail "-export-dynamic" "-Wl,--export-dynamic"
     '';
   });
+
+  upower = (prev.upower.overrideAttrs {
+    doCheck = !stdenv.hostPlatform.useLLVM;
+  }).override {
+    umockdev = runCommand umockdev.name {} "mkdir -p $out";
+  };
 
   bind = prev.bind.override {
     jemalloc = null;
@@ -235,8 +256,55 @@ in
     NIX_LDFLAGS = lib.optionalString (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") "--undefined-version";
   });
 
+  libgphoto2 = prev.libgphoto2.overrideAttrs (f: p: {
+    NIX_LDFLAGS = lib.optionalString (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") "--undefined-version";
+  });
+
+  stoken = prev.stoken.overrideAttrs (f: p: {
+    configureFlags = p.configureFlags or []
+      ++ lib.optional (stdenv.hostPlatform.useLLVM) "LDFLAGS=-Wl,--undefined-version";
+  });
+
+  libxklavier = prev.libxklavier.overrideAttrs (f: p: {
+    configureFlags = p.configureFlags
+      ++ lib.optional (stdenv.hostPlatform.useLLVM) "LDFLAGS=-Wl,--undefined-version";
+  });
+
   util-linux = prev.util-linux.overrideAttrs (f: p: {
     configureFlags = p.configureFlags
       ++ lib.optional (stdenv.hostPlatform.useLLVM) "LDFLAGS=-Wl,--undefined-version";
+  });
+
+  accountsservice = prev.accountsservice.overrideAttrs (f: p: {
+    env = p.env // lib.optionalAttrs (stdenv.hostPlatform.useLLVM) {
+      NIX_CFLAGS_COMPILE = "-Wno-implicit-function-declaration -Wno-return-mismatch";
+    };
+  });
+
+  git = prev.git.overrideAttrs (f: p: {
+    preInstallCheck = p.preInstallCheck
+      + ''
+        disable_test t4200-rerere
+        disable_test t5319-multi-pack-index
+        disable_test t0027-auto-crlf
+        disable_test t7513-interpret-trailers
+      '';
+  });
+
+  gjs = prev.gjs.overrideAttrs (f: p: {
+    doCheck = p.doCheck && !stdenv.hostPlatform.useLLVM;
+  });
+
+  libsecret = prev.libsecret.overrideAttrs (f: p: {
+    doCheck = p.doCheck && !stdenv.hostPlatform.useLLVM;
+  });
+
+  # Temporary fix until Perl's XMLParser builds
+  xdg-utils = if stdenv.hostPlatform.useLLVM then
+    runCommand prev.xdg-utils.name {} "mkdir -p $out"
+  else prev.xdg-utils;
+
+  firefox = wrapFirefox (firefox-unwrapped.override {
+    jemallocSupport = false;
   });
 }
