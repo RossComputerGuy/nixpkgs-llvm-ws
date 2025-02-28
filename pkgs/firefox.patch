@@ -1,0 +1,44 @@
+--- a/gfx/graphite2/src/MozGrMalloc.h
++++ b/gfx/graphite2/src/MozGrMalloc.h
+@@ -10,21 +10,12 @@
+ // predictable, safe OOM crashes rather than relying on the code to handle
+ // allocation failures reliably.
+ 
+ #include "mozilla/mozalloc.h"
+ 
+-#if defined(XP_LINUX) && !defined(ANDROID)
+-
+-#define malloc moz_xmalloc
+-#define calloc moz_xcalloc
+-#define realloc moz_xrealloc
+-
+-#else
+-
+ // extern "C" is needed for the Solaris build, while the inline
+-// functions are needed for the MinGW build. They break gcc 5.4.0
+-// on Linux however, so keep the old #define's above for Linux
++// functions are needed for the MinGW build.
+ 
+ extern "C" inline void* malloc(size_t size)
+ {
+     return moz_xmalloc(size);
+ }
+@@ -37,8 +28,6 @@
+ extern "C" inline void* realloc(void *ptr, size_t size)
+ {
+     return moz_xrealloc(ptr, size);
+ }
+ 
+-#endif // defined(XP_LINUX)
+-
+ #endif // MOZ_GR_MALLOC_H
+--- a/toolkit/moz.configure	2025-02-27 16:28:44.846499151 -0800
++++ b/toolkit/moz.configure	2025-02-27 23:54:07.260928328 -0800
+@@ -1838,6 +1838,7 @@
+         flags = [
+             "-B",
+             os.path.join(build_env.topobjdir, "build", "unix", "elfhack"),
++            f"--ld-path={os.path.join(build_env.topobjdir, "build", "unix", "elfhack", os.path.basename(ld))}"
+         ]
+         if os.path.basename(ld) != ld:
+             flags.append(f"-Wl,--real-linker,{ld}")

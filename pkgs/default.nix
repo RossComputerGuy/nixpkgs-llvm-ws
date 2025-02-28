@@ -309,6 +309,18 @@ in
     doCheck = p.doCheck && !stdenv.hostPlatform.useLLVM;
   });
 
+  firefox-unwrapped = (prev.firefox-unwrapped.overrideAttrs (f: p: {
+    patches = p.patches or []
+      ++ lib.optional (stdenv.hostPlatform.useLLVM) ./firefox.patch;
+
+    env = lib.optionalAttrs (stdenv.hostPlatform.useLLVM) {
+      HOST_CXXSTDLIB = "c++";
+      TARGET_CXXSTDLIB = "c++";
+    };
+  })).override {
+    crashreporterSupport = !stdenv.hostPlatform.useLLVM;
+  };
+
   libunwind = if stdenv.hostPlatform.useLLVM then
     llvmPackages.libunwind
   else prev.libunwind;
