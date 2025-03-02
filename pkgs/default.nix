@@ -102,6 +102,10 @@ in
         '';
       });
 
+      pygobject3 = pythonPrev.pygobject3.overrideAttrs (attrs: {
+        disallowedReferences = [];
+      });
+
       # PR: https://github.com/NixOS/nixpkgs/pull/384147
       eventlet = pythonPrev.eventlet.overrideAttrs (attrs: {
         disabledTests = attrs.disabledTests ++ [
@@ -166,6 +170,8 @@ in
   ffmpeg = (prev.ffmpeg.override {
     withOpenmpt = false;
     withSdl2 = false;
+    withPulse = false;
+    withSpeex = false;
   }).overrideAttrs (f: p: {
     configureFlags = p.configureFlags
       ++ lib.optionals (stdenv.cc.isClang) [
@@ -178,6 +184,8 @@ in
 
   ffmpeg-headless = (prev.ffmpeg-headless.override {
     withOpenmpt = false;
+    withPulse = false;
+    withSpeex = false;
   }).overrideAttrs (f: p: {
     configureFlags = p.configureFlags
       ++ lib.optionals (stdenv.cc.isClang) [
@@ -219,6 +227,10 @@ in
   });
 
   libpulseaudio = prev.libpulseaudio.overrideAttrs (f: p: {
+    NIX_LDFLAGS = lib.optionalString (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") "--undefined-version";
+  });
+
+  pulseaudio = prev.pulseaudio.overrideAttrs (f: p: {
     NIX_LDFLAGS = lib.optionalString (stdenv.cc.bintools.isLLVM && lib.versionAtLeast stdenv.cc.bintools.version "17") "--undefined-version";
   });
 
@@ -324,4 +336,12 @@ in
   libunwind = if stdenv.hostPlatform.useLLVM then
     llvmPackages.libunwind
   else prev.libunwind;
+
+  mesa = prev.mesa.override {
+    libunwind = if stdenv.hostPlatform.useLLVM then prev.libunwind else final.libunwind;
+  };
+
+  gst_all_1 = prev.gst_all_1 // {
+    gstreamer = prev.gst_all_1.gstreamer.override { withLibunwind = false; };
+  };
 }

@@ -103,7 +103,7 @@
                         "vfat"
                         "xfs"
                       ];
-                      kernelParams = [ "console=serial0,115200" ];
+                      kernelParams = [ "console=serial0,115200" "cma=256M" ];
                     };
                   }
                 )
