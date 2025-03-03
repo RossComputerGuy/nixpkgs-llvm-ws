@@ -344,4 +344,12 @@ in
   gst_all_1 = prev.gst_all_1 // {
     gstreamer = prev.gst_all_1.gstreamer.override { withLibunwind = false; };
   };
+
+  graphene = prev.graphene.overrideAttrs (f: p: {
+    outputs = p.outputs ++ [ "installedTests" ];
+
+    preConfigure = ''
+      mesonFlags+="-Dinstalled_test_datadir=$installedTests/share -Dinstalled_test_bindir=$installedTests/libexec"
+    '';
+  });
 }

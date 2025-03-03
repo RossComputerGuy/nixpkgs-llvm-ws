@@ -29,7 +29,7 @@
       accounts-daemon.enable = true;
       dbus.packages = with pkgs; [ cosmic-greeter ];
       speechd.enable = false;
-      pipewire.enable = false;
+      pipewire.enable = true;
       udev.packages = [ pkgs.libinput.out ];
       greetd = {
         enable = true;
